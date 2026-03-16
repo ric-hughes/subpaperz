@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🏗️ SubTrack — Stop Chasing Lien Waivers</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50:  '#eff6ff',
+              100: '#dbeafe',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+              900: '#1e3a5f',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .gradient-hero { background: linear-gradient(135deg, #1e3a5f 0%, #1d4ed8 100%); }
+    .card-hover { transition: transform 0.2s, box-shadow 0.2s; }
+    .card-hover:hover { transform: translateY(-4px); box-shadow: 0 20px 40px rgba(0,0,0,0.12); }
+  </style>
+</head>
+<body class="bg-white text-gray-900 font-sans antialiased">
+
+  <!-- ── Nav ────────────────────────────────────────────────────────────── -->
+  <nav class="sticky top-0 z-50 bg-white border-b border-gray-100 shadow-sm">
+    <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <span class="text-2xl">🏗️</span>
+        <span class="text-xl font-bold text-brand-900">SubTrack</span>
+      </div>
+      <a href="#waitlist"
+         class="bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold px-5 py-2 rounded-lg transition-colors">
+        Get Early Access
+      </a>
+    </div>
+  </nav>
+
+  <!-- ── Hero ───────────────────────────────────────────────────────────── -->
+  <section class="gradient-hero text-white py-24 px-6">
+    <div class="max-w-4xl mx-auto text-center">
+      <div class="inline-block bg-blue-500 bg-opacity-30 text-blue-100 text-sm font-semibold px-4 py-1 rounded-full mb-6">
+        Built for small general contractors
+      </div>
+      <h1 class="text-5xl md:text-6xl font-extrabold leading-tight mb-6">
+        Stop chasing lien waivers.<br />Start getting paid.
+      </h1>
+      <p class="text-xl md:text-2xl text-blue-100 mb-10 max-w-2xl mx-auto">
+        SubTrack keeps your W-9s, COIs, and lien waivers organized — so no missing doc ever holds up your draw again.
+      </p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <a href="#waitlist"
+           class="bg-white text-brand-700 hover:bg-blue-50 font-bold text-lg px-8 py-4 rounded-xl transition-colors shadow-lg">
+          Join the Waitlist — It's Free
+        </a>
+        <a href="#how-it-works"
+           class="border border-blue-300 text-white hover:bg-white hover:bg-opacity-10 font-semibold text-lg px-8 py-4 rounded-xl transition-colors">
+          See How It Works
+        </a>
+      </div>
+      <p class="mt-6 text-blue-200 text-sm">$49/mo · No credit card to join waitlist · Cancel anytime</p>
+    </div>
+  </section>
+
+  <!-- ── Problem ────────────────────────────────────────────────────────── -->
+  <section class="py-20 px-6 bg-gray-50">
+    <div class="max-w-5xl mx-auto">
+      <div class="text-center mb-14">
+        <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Sound familiar?</h2>
+        <p class="text-lg text-gray-500 max-w-xl mx-auto">Managing sub compliance with spreadsheets and text messages is costing you time and money.</p>
+      </div>
+      <div class="grid md:grid-cols-3 gap-8">
+        <div class="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 card-hover">
+          <div class="text-4xl mb-4">📋</div>
+          <h3 class="text-lg font-bold mb-2 text-gray-900">Spreadsheet chaos</h3>
+          <p class="text-gray-500">Tracking 12 subs across 3 projects in a shared Google Sheet — then realizing it's 3 months out of date.</p>
+        </div>
+        <div class="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 card-hover">
+          <div class="text-4xl mb-4">📵</div>
+          <h3 class="text-lg font-bold mb-2 text-gray-900">Chasing docs by text</h3>
+          <p class="text-gray-500">"Hey Mike, need your updated COI and the waiver for the kitchen job." Sent. No reply. Sent again. Still waiting.</p>
+        </div>
+        <div class="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 card-hover">
+          <div class="text-4xl mb-4">💸</div>
+          <h3 class="text-lg font-bold mb-2 text-gray-900">Draws held up</h3>
+          <p class="text-gray-500">One expired COI or missing lien waiver can freeze a $60,000 draw for days. That's your cash flow on the line.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── How It Works ───────────────────────────────────────────────────── -->
+  <section id="how-it-works" class="py-20 px-6 bg-white">
+    <div class="max-w-5xl mx-auto">
+      <div class="text-center mb-14">
+        <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">How SubTrack works</h2>
+        <p class="text-lg text-gray-500 max-w-xl mx-auto">All your sub compliance in one place. No training required.</p>
+      </div>
+      <div class="grid md:grid-cols-2 gap-10 items-center">
+        <div class="space-y-8">
+          <div class="flex gap-5">
+            <div class="flex-shrink-0 w-10 h-10 bg-brand-600 text-white rounded-full flex items-center justify-center font-bold text-lg">1</div>
+            <div>
+              <h3 class="font-bold text-lg mb-1">Add your subs and projects</h3>
+              <p class="text-gray-500">Set up your subcontractor roster and assign them to projects in minutes. Import from a CSV or add manually.</p>
+            </div>
+          </div>
+          <div class="flex gap-5">
+            <div class="flex-shrink-0 w-10 h-10 bg-brand-600 text-white rounded-full flex items-center justify-center font-bold text-lg">2</div>
+            <div>
+              <h3 class="font-bold text-lg mb-1">Request documents with one click</h3>
+              <p class="text-gray-500">Hit "Request Docs" and SubTrack emails your sub a secure link to upload their W-9, COI, or sign a lien waiver — no login needed on their end.</p>
+            </div>
+          </div>
+          <div class="flex gap-5">
+            <div class="flex-shrink-0 w-10 h-10 bg-brand-600 text-white rounded-full flex items-center justify-center font-bold text-lg">3</div>
+            <div>
+              <h3 class="font-bold text-lg mb-1">See your compliance status at a glance</h3>
+              <p class="text-gray-500">Green means go. Yellow means expiring soon. Red means you're missing something. No more spreadsheet archaeology.</p>
+            </div>
+          </div>
+          <div class="flex gap-5">
+            <div class="flex-shrink-0 w-10 h-10 bg-brand-600 text-white rounded-full flex items-center justify-center font-bold text-lg">4</div>
+            <div>
+              <h3 class="font-bold text-lg mb-1">Never miss an expiry again</h3>
+              <p class="text-gray-500">SubTrack alerts you 30 days before any COI expires and auto-follows up with subs who haven't responded.</p>
+            </div>
+          </div>
+        </div>
+        <div class="bg-gray-50 rounded-2xl p-8 border border-gray-200">
+          <div class="text-center text-gray-400 text-sm mb-4 font-medium uppercase tracking-wide">Dashboard Preview</div>
+          <div class="space-y-3">
+            <div class="bg-white rounded-xl p-4 border border-gray-100 flex items-center justify-between">
+              <div>
+                <div class="font-semibold text-sm">Apex Electrical</div>
+                <div class="text-xs text-gray-400">Kitchen Reno — Project #4</div>
+              </div>
+              <span class="bg-green-100 text-green-700 text-xs font-bold px-3 py-1 rounded-full">✓ All Clear</span>
+            </div>
+            <div class="bg-white rounded-xl p-4 border border-gray-100 flex items-center justify-between">
+              <div>
+                <div class="font-semibold text-sm">Blue Ridge Plumbing</div>
+                <div class="text-xs text-gray-400">Master Bath — Project #4</div>
+              </div>
+              <span class="bg-yellow-100 text-yellow-700 text-xs font-bold px-3 py-1 rounded-full">⚠ COI Expiring</span>
+            </div>
+            <div class="bg-white rounded-xl p-4 border border-gray-100 flex items-center justify-between">
+              <div>
+                <div class="font-semibold text-sm">Drywall Pro LLC</div>
+                <div class="text-xs text-gray-400">Addition — Project #5</div>
+              </div>
+              <span class="bg-red-100 text-red-700 text-xs font-bold px-3 py-1 rounded-full">✗ Waiver Missing</span>
+            </div>
+            <div class="bg-white rounded-xl p-4 border border-gray-100 flex items-center justify-between">
+              <div>
+                <div class="font-semibold text-sm">Summit HVAC</div>
+                <div class="text-xs text-gray-400">Addition — Project #5</div>
+              </div>
+              <span class="bg-green-100 text-green-700 text-xs font-bold px-3 py-1 rounded-full">✓ All Clear</span>
+            </div>
+            <button class="w-full mt-2 bg-brand-600 text-white text-sm font-semibold py-2 rounded-lg">
+              Send Reminder to Drywall Pro →
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Features ───────────────────────────────────────────────────────── -->
+  <section class="py-20 px-6 bg-gray-50">
+    <div class="max-w-5xl mx-auto">
+      <div class="text-center mb-14">
+        <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Everything you need. Nothing you don't.</h2>
+        <p class="text-lg text-gray-500">No project management bloat. No $400/mo enterprise contracts. Just compliance, done right.</p>
+      </div>
+      <div class="grid md:grid-cols-3 gap-6">
+        <div class="bg-white rounded-2xl p-7 shadow-sm border border-gray-100 card-hover">
+          <div class="text-3xl mb-3">🗂️</div>
+          <h3 class="font-bold text-lg mb-2">Document Vault</h3>
+          <p class="text-gray-500 text-sm">Securely store W-9s, COIs, and signed lien waivers per sub, per project. Searchable and always accessible.</p>
+        </div>
+        <div class="bg-white rounded-2xl p-7 shadow-sm border border-gray-100 card-hover">
+          <div class="text-3xl mb-3">✍️</div>
+          <h3 class="font-bold text-lg mb-2">E-Sign Lien Waivers</h3>
+          <p class="text-gray-500 text-sm">Generate conditional or unconditional lien waiver PDFs and send a no-login signing link to your sub. Done in 60 seconds.</p>
+        </div>
+        <div class="bg-white rounded-2xl p-7 shadow-sm border border-gray-100 card-hover">
+          <div class="text-3xl mb-3">⏰</div>
+          <h3 class="font-bold text-lg mb-2">COI Expiry Alerts</h3>
+          <p class="text-gray-500 text-sm">Set expiry dates on certificates of insurance. Get email alerts 30 days before they expire — and auto-remind your subs.</p>
+        </div>
+        <div class="bg-white rounded-2xl p-7 shadow-sm border border-gray-100 card-hover">
+          <div class="text-3xl mb-3">📊</div>
+          <h3 class="font-bold text-lg mb-2">Compliance Dashboard</h3>
+          <p class="text-gray-500 text-sm">See every sub's compliance status across all active projects at a glance. Green, yellow, red — you always know where you stand.</p>
+        </div>
+        <div class="bg-white rounded-2xl p-7 shadow-sm border border-gray-100 card-hover">
+          <div class="text-3xl mb-3">📧</div>
+          <h3 class="font-bold text-lg mb-2">Automated Reminders</h3>
+          <p class="text-gray-500 text-sm">One-click document request emails to subs. SubTrack follows up automatically after 3 days if there's no response.</p>
+        </div>
+        <div class="bg-white rounded-2xl p-7 shadow-sm border border-gray-100 card-hover">
+          <div class="text-3xl mb-3">🔒</div>
+          <h3 class="font-bold text-lg mb-2">Secure & Private</h3>
+          <p class="text-gray-500 text-sm">Your documents are encrypted at rest. Subs access only what you send them — no account creation, no data sharing.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Social Proof ───────────────────────────────────────────────────── -->
+  <section class="py-20 px-6 bg-white">
+    <div class="max-w-5xl mx-auto">
+      <div class="text-center mb-14">
+        <h2 class="text-3xl font-bold text-gray-900 mb-2">GCs who get it</h2>
+        <p class="text-gray-400">Early access users share what SubTrack means for their workflow.</p>
+      </div>
+      <div class="grid md:grid-cols-3 gap-8">
+        <div class="bg-gray-50 rounded-2xl p-7 border border-gray-100">
+          <p class="text-gray-700 italic mb-5">"I had a $55K draw held up for a week because one sub's COI expired. That's the last time that happens. SubTrack would have caught it 30 days out."</p>
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-brand-600 rounded-full flex items-center justify-center text-white font-bold">M</div>
+            <div>
+              <div class="font-semibold text-sm">Mike T.</div>
+              <div class="text-xs text-gray-400">Residential GC, Nashville TN</div>
+            </div>
+          </div>
+        </div>
+        <div class="bg-gray-50 rounded-2xl p-7 border border-gray-100">
+          <p class="text-gray-700 italic mb-5">"We use Procore for our big jobs but it's way too much for our smaller projects. SubTrack is exactly what I needed for my bread-and-butter remodels."</p>
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-brand-600 rounded-full flex items-center justify-center text-white font-bold">D</div>
+            <div>
+              <div class="font-semibold text-sm">Dave R.</div>
+              <div class="text-xs text-gray-400">Custom Home Builder, Austin TX</div>
+            </div>
+          </div>
+        </div>
+        <div class="bg-gray-50 rounded-2xl p-7 border border-gray-100">
+          <p class="text-gray-700 italic mb-5">"The e-sign lien waiver feature alone is worth it. My subs are on job sites — they can sign from their phone in 30 seconds. I used to wait 3 days for a fax."</p>
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-brand-600 rounded-full flex items-center justify-center text-white font-bold">J</div>
+            <div>
+              <div class="font-semibold text-sm">Jennifer L.</div>
+              <div class="text-xs text-gray-400">Commercial GC, Denver CO</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Pricing ────────────────────────────────────────────────────────── -->
+  <section id="pricing" class="py-20 px-6 bg-gray-50">
+    <div class="max-w-4xl mx-auto">
+      <div class="text-center mb-14">
+        <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Simple pricing. No surprises.</h2>
+        <p class="text-lg text-gray-500">3–8x cheaper than Procore or Buildertrend. Built for your size.</p>
+      </div>
+      <div class="grid md:grid-cols-2 gap-8 max-w-3xl mx-auto">
+        <!-- Solo -->
+        <div class="bg-white rounded-2xl p-8 shadow-sm border border-gray-200 card-hover">
+          <div class="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-2">Solo</div>
+          <div class="text-5xl font-extrabold text-gray-900 mb-1">$49<span class="text-xl font-normal text-gray-400">/mo</span></div>
+          <div class="text-sm text-gray-400 mb-6">or $490/yr (save $98)</div>
+          <ul class="space-y-3 mb-8 text-sm text-gray-600">
+            <li class="flex gap-2"><span class="text-green-500 font-bold">✓</span> 1 user account</li>
+            <li class="flex gap-2"><span class="text-green-500 font-bold">✓</span> Up to 10 active subcontractors</li>
+            <li class="flex gap-2"><span class="text-green-500 font-bold">✓</span> Unlimited lien waiver e-signs</li>
+            <li class="flex gap-2"><span class="text-green-500 font-bold">✓</span> COI expiry tracking + alerts</li>
+            <li class="flex gap-2"><span class="text-green-500 font-bold">✓</span> Document vault (5 GB)</li>
+            <li class="flex gap-2"><span class="text-green-500 font-bold">✓</span> Automated reminders</li>
+          </ul>
+          <a href="#waitlist" class="block text-center bg-gray-900 hover:bg-gray-800 text-white font-semibold py-3 rounded-xl transition-colors">
+            Join Waitlist
+          </a>
+        </div>
+        <!-- Small Crew -->
+        <div class="bg-brand-700 rounded-2xl p-8 shadow-xl border border-brand-600 card-hover relative">
+          <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-yellow-400 text-yellow-900 text-xs font-bold px-4 py-1 rounded-full">Most Popular</div>
+          <div class="text-sm font-semibold text-blue-200 uppercase tracking-wide mb-2">Small Crew</div>
+          <div class="text-5xl font-extrabold text-white mb-1">$99<span class="text-xl font-normal text-blue-200">/mo</span></div>
+          <div class="text-sm text-blue-200 mb-6">or $990/yr (save $198)</div>
+          <ul class="space-y-3 mb-8 text-sm text-blue-100">
+            <li class="flex gap-2"><span class="text-yellow-300 font-bold">✓</span> Up to 5 user accounts</li>
+            <li class="flex gap-2"><span class="text-yellow-300 font-bold">✓</span> Unlimited active subcontractors</li>
+            <li class="flex gap-2"><span class="text-yellow-300 font-bold">✓</span> Unlimited lien waiver e-signs</li>
+            <li class="flex gap-2"><span class="text-yellow-300 font-bold">✓</span> COI expiry tracking + alerts</li>
+            <li class="flex gap-2"><span class="text-yellow-300 font-bold">✓</span> Document vault (25 GB)</li>
+            <li class="flex gap-2"><span class="text-yellow-300 font-bold">✓</span> Automated reminders</li>
+            <li class="flex gap-2"><span class="text-yellow-300 font-bold">✓</span> Priority email support</li>
+          </ul>
+          <a href="#waitlist" class="block text-center bg-white hover:bg-blue-50 text-brand-700 font-semibold py-3 rounded-xl transition-colors">
+            Join Waitlist
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Waitlist ────────────────────────────────────────────────────────── -->
+  <section id="waitlist" class="py-24 px-6 gradient-hero text-white">
+    <div class="max-w-xl mx-auto text-center">
+      <h2 class="text-3xl md:text-4xl font-bold mb-4">Get early access</h2>
+      <p class="text-blue-100 text-lg mb-10">Join the waitlist and get 90 days free when we launch. We're onboarding our first 50 GCs personally.</p>
+      <form action="https://formspree.io/f/YOUR_FORM_ID" method="POST" class="flex flex-col gap-4">
+        <input
+          type="text"
+          name="name"
+          placeholder="Your name"
+          required
+          class="w-full px-5 py-4 rounded-xl text-gray-900 text-lg focus:outline-none focus:ring-4 focus:ring-blue-300"
+        />
+        <input
+          type="email"
+          name="email"
+          placeholder="Your email address"
+          required
+          class="w-full px-5 py-4 rounded-xl text-gray-900 text-lg focus:outline-none focus:ring-4 focus:ring-blue-300"
+        />
+        <input
+          type="text"
+          name="company"
+          placeholder="Company name (optional)"
+          class="w-full px-5 py-4 rounded-xl text-gray-900 text-lg focus:outline-none focus:ring-4 focus:ring-blue-300"
+        />
+        <button
+          type="submit"
+          class="w-full bg-yellow-400 hover:bg-yellow-300 text-yellow-900 font-extrabold text-lg py-4 rounded-xl transition-colors shadow-lg">
+          Reserve My Spot — It's Free →
+        </button>
+      </form>
+      <p class="mt-4 text-blue-200 text-sm">No spam. No credit card. Just early access.</p>
+    </div>
+  </section>
+
+  <!-- ── Footer ─────────────────────────────────────────────────────────── -->
+  <footer class="bg-gray-900 text-gray-400 py-10 px-6">
+    <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-2">
+        <span class="text-xl">🏗️</span>
+        <span class="font-bold text-white">SubTrack</span>
+        <span class="text-gray-500 text-sm ml-2">— Compliance tracking for small GCs</span>
+      </div>
+      <div class="text-sm">© 2026 SubTrack. All rights reserved.</div>
+    </div>
+  </footer>
+
+</body>
+</html>
