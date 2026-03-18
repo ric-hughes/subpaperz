@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Projects — SubPaperz</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="manifest" href="/manifest.json"/>
+<style>
+body{background:#0f172a;}
+input,select,textarea{background:#1e293b!important;color:#f1f5f9!important;border-color:#334155!important;}
+input:focus,select:focus,textarea:focus{border-color:#3b82f6!important;outline:none;box-shadow:0 0 0 2px rgba(59,130,246,0.3);}
+.modal-bg{background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);}
+</style>
+</head>
+<body class="min-h-screen text-slate-100 font-sans flex">
+
+<!-- Sidebar -->
+<div class="w-56 bg-slate-900 border-r border-slate-700 flex flex-col min-h-screen fixed left-0 top-0 z-20">
+  <div class="px-4 py-5 border-b border-slate-700">
+    <a href="/app/index.html" class="text-blue-400 font-bold text-lg tracking-tight">SubPaperz</a>
+  </div>
+  <nav class="flex-1 px-2 py-4 space-y-1">
+    <a href="/app/dashboard.html" class="flex items-center gap-2 px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 text-sm">📊 Dashboard</a>
+    <a href="/app/projects.html" class="flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-900/40 text-blue-300 text-sm font-medium">📁 Projects</a>
+    <a href="/app/subs.html" class="flex items-center gap-2 px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 text-sm">👷 Subcontractors</a>
+    <a href="/app/documents.html" class="flex items-center gap-2 px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 text-sm">📄 Documents</a>
+    <a href="/app/coi-tracker.html" class="flex items-center gap-2 px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 text-sm">🛡 COI Tracker</a>
+    <a href="/app/account.html" class="flex items-center gap-2 px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 text-sm">⚙️ Account</a>
+  </nav>
+  <div class="px-4 py-3 border-t border-slate-700">
+    <div id="planBadge" class="text-xs text-slate-500 mb-2">Free Plan</div>
+    <button onclick="signOut()" class="text-xs text-slate-500 hover:text-red-400">Sign out</button>
+  </div>
+</div>
+
+<!-- Main -->
+<div class="ml-56 flex-1 p-8">
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-white">Projects</h1>
+      <p class="text-slate-400 text-sm mt-1">Manage your active and completed construction projects.</p>
+    </div>
+    <button onclick="openModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold">+ New Project</button>
+  </div>
+
+  <!-- Filter bar -->
+  <div class="flex gap-2 mb-6">
+    <button onclick="setFilter('all')" id="filterAll" class="px-3 py-1.5 rounded-lg text-sm font-medium bg-blue-600 text-white">All</button>
+    <button onclick="setFilter('active')" id="filterActive" class="px-3 py-1.5 rounded-lg text-sm font-medium bg-slate-700 text-slate-300 hover:bg-slate-600">Active</button>
+    <button onclick="setFilter('completed')" id="filterCompleted" class="px-3 py-1.5 rounded-lg text-sm font-medium bg-slate-700 text-slate-300 hover:bg-slate-600">Completed</button>
+  </div>
+
+  <!-- Projects Grid -->
+  <div id="projectsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+
+  <!-- Empty state -->
+  <div id="emptyState" class="hidden text-center py-20">
+    <div class="text-5xl mb-4">📁</div>
+    <h3 class="text-lg font-semibold text-white mb-2">No projects yet</h3>
+    <p class="text-slate-400 text-sm mb-6">Create your first project to start tracking documents and subcontractors.</p>
+    <button onclick="openModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold">Create First Project</button>
+  </div>
+</div>
+
+<!-- New/Edit Project Modal -->
+<div id="projectModal" class="hidden fixed inset-0 modal-bg z-50 flex items-center justify-center p-4">
+  <div class="bg-slate-800 rounded-2xl border border-slate-700 w-full max-w-md">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-slate-700">
+      <h2 id="modalTitle" class="font-semibold text-white">New Project</h2>
+      <button onclick="closeModal()" class="text-slate-400 hover:text-white text-xl leading-none">✕</button>
+    </div>
+    <div class="p-6 space-y-4">
+      <input type="hidden" id="editProjectId"/>
+      <div>
+        <label class="block text-xs text-slate-400 mb-1">Project Name *</label>
+        <input type="text" id="pName" placeholder="Main Street Office Renovation" class="w-full rounded-lg border px-3 py-2 text-sm"/>
+      </div>
+      <div>
+        <label class="block text-xs text-slate-400 mb-1">Project Address</label>
+        <input type="text" id="pAddress" placeholder="123 Main St, Boise, ID 83702" class="w-full rounded-lg border px-3 py-2 text-sm"/>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">State</label>
+          <select id="pState" class="w-full rounded-lg border px-3 py-2 text-sm">
+            <option value="ID">Idaho</option><option value="SD">South Dakota</option>
+            <option value="NE">Nebraska</option><option value="KS">Kansas</option>
+            <option value="CO">Colorado</option><option value="MT">Montana</option>
+            <option value="OK">Oklahoma</option><option value="NH">New Hampshire</option>
+            <option value="ND">North Dakota</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">Status</label>
+          <select id="pStatus" class="w-full rounded-lg border px-3 py-2 text-sm">
+            <option value="active">Active</option>
+            <option value="completed">Completed</option>
+          </select>
+        </div>
+      </div>
+      <div id="modalError" class="hidden bg-red-900/40 border border-red-600 text-red-300 rounded-lg px-3 py-2 text-sm"></div>
+    </div>
+    <div class="px-6 py-4 border-t border-slate-700 flex gap-3 justify-end">
+      <button onclick="closeModal()" class="px-4 py-2 text-slate-400 hover:text-white text-sm">Cancel</button>
+      <button onclick="saveProject()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg text-sm font-semibold">Save Project</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/js/config.js"></script>
+<script src="/js/supabase-client.js"></script>
+<script src="/js/auth.js"></script>
+<script src="/js/projects.js"></script>
+<script>
+let allProjects = [];
+let currentFilter = 'all';
+
+async function init() {
+  await checkAuth();
+  await refresh();
+  const u = await db.auth.getUser();
+  if (u.data?.user) {
+    const { data } = await db.from('profiles').select('plan').eq('id', u.data.user.id).single();
+    if (data) document.getElementById('planBadge').textContent = (data.plan||'free').charAt(0).toUpperCase()+(data.plan||'free').slice(1)+' Plan';
+  }
+}
+
+async function refresh() {
+  try { allProjects = await loadProjects(); render(); } catch(e) { console.error(e); }
+}
+
+function setFilter(f) {
+  currentFilter = f;
+  ['all','active','completed'].forEach(x => {
+    const btn = document.getElementById('filter'+x.charAt(0).toUpperCase()+x.slice(1));
+    btn.className = x===f ? 'px-3 py-1.5 rounded-lg text-sm font-medium bg-blue-600 text-white' : 'px-3 py-1.5 rounded-lg text-sm font-medium bg-slate-700 text-slate-300 hover:bg-slate-600';
+  });
+  render();
+}
+
+function render() {
+  const filtered = currentFilter==='all' ? allProjects : allProjects.filter(p=>p.status===currentFilter);
+  const grid = document.getElementById('projectsGrid');
+  const empty = document.getElementById('emptyState');
+  if (!filtered.length) { grid.innerHTML=''; empty.classList.remove('hidden'); return; }
+  empty.classList.add('hidden');
+  grid.innerHTML = filtered.map(p => {
+    const isActive = p.status==='active';
+    return `<div class="bg-slate-800 border border-slate-700 rounded-xl p-5 hover:border-slate-600 transition">
+      <div class="flex items-start justify-between mb-3">
+        <div class="flex-1 min-w-0">
+          <h3 class="font-semibold text-white truncate">${esc(p.name)}</h3>
+          <p class="text-slate-400 text-xs mt-0.5 truncate">${esc(p.address||'No address')}</p>
+        </div>
+        <span class="ml-2 flex-shrink-0 inline-flex px-2 py-0.5 rounded-full text-xs font-medium border ${isActive?'bg-green-900/40 text-green-400 border-green-700':'bg-slate-700 text-slate-400 border-slate-600'}">${p.status||'active'}</span>
+      </div>
+      <div class="flex items-center gap-2 text-xs text-slate-500 mb-4">
+        <span class="bg-slate-700 px-2 py-0.5 rounded">${p.state||'ID'}</span>
+        <span>Created ${new Date(p.created_at).toLocaleDateString()}</span>
+      </div>
+      <div class="flex gap-2">
+        <a href="/app/documents.html?project=${p.id}" class="flex-1 text-center bg-slate-700 hover:bg-slate-600 text-slate-300 text-xs py-1.5 rounded-lg transition">View Docs</a>
+        <button onclick="editProject('${p.id}')" class="px-3 bg-slate-700 hover:bg-slate-600 text-slate-300 text-xs py-1.5 rounded-lg transition">Edit</button>
+        <button onclick="confirmArchive('${p.id}','${p.status}')" class="px-3 bg-slate-700 hover:bg-slate-600 text-slate-400 text-xs py-1.5 rounded-lg transition">${isActive?'Archive':'Restore'}</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function openModal(){ document.getElementById('editProjectId').value=''; document.getElementById('modalTitle').textContent='New Project'; document.getElementById('pName').value=''; document.getElementById('pAddress').value=''; document.getElementById('pState').value='ID'; document.getElementById('pStatus').value='active'; document.getElementById('modalError').classList.add('hidden'); document.getElementById('projectModal').classList.remove('hidden'); }
+function closeModal(){ document.getElementById('projectModal').classList.add('hidden'); }
+
+async function editProject(id) {
+  const p = allProjects.find(x=>x.id===id); if(!p) return;
+  document.getElementById('editProjectId').value=id;
+  document.getElementById('modalTitle').textContent='Edit Project';
+  document.getElementById('pName').value=p.name||'';
+  document.getElementById('pAddress').value=p.address||'';
+  document.getElementById('pState').value=p.state||'ID';
+  document.getElementById('pStatus').value=p.status||'active';
+  document.getElementById('modalError').classList.add('hidden');
+  document.getElementById('projectModal').classList.remove('hidden');
+}
+
+async function saveProject() {
+  const id = document.getElementById('editProjectId').value;
+  const name = document.getElementById('pName').value.trim();
+  const errEl = document.getElementById('modalError');
+  if(!name){ errEl.textContent='Project name is required.'; errEl.classList.remove('hidden'); return; }
+  const data = { name, address:document.getElementById('pAddress').value, state:document.getElementById('pState').value, status:document.getElementById('pStatus').value };
+  try {
+    errEl.classList.add('hidden');
+    if(id) await updateProject(id,data); else await createProject(data);
+    closeModal(); await refresh();
+  } catch(e){ errEl.textContent=e.message; errEl.classList.remove('hidden'); }
+}
+
+async function confirmArchive(id, status) {
+  const action = status==='active'?'archive':'restore';
+  if(!confirm(`${action.charAt(0).toUpperCase()+action.slice(1)} this project?`)) return;
+  try { await archiveProject(id, status==='active'?'completed':'active'); await refresh(); } catch(e){ alert(e.message); }
+}
+
+function signOut(){ db.auth.signOut().then(()=>window.location.href='/index.html'); }
+init();
+</script>
+</body>
+</html>

@@ -187,7 +187,8 @@ function showError(msg) {
 function showPortal() {
   document.getElementById('loadingState').classList.add('hidden');
   const name = subRecord.contact_name || subRecord.company_name || 'Subcontractor';
-  document.getElementById('portalSubInfo').textContent = name + (subRecord.company_name ? ' — ' + subRecord.company_name : '');
+  const company = subRecord.company_name && subRecord.company_name !== name ? ' — ' + subRecord.company_name : '';
+  document.getElementById('portalSubInfo').textContent = name + company;
   document.getElementById('infoPhone').value = subRecord.phone || '';
   document.getElementById('infoAddress').value = subRecord.address || '';
   document.getElementById('infoLicense').value = subRecord.license_number || '';

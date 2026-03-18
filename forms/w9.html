@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>W-9 Form — SubPaperz</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
+<link rel="manifest" href="/manifest.json"/>
+<style>
+  body { background: #0f172a; }
+  .sig-canvas { border: 2px dashed #94a3b8; background: white; cursor: crosshair; width: 100%; height: 140px; border-radius: 8px; }
+  input, select, textarea { background: #1e293b !important; color: #f1f5f9 !important; border-color: #334155 !important; }
+  input:focus, select:focus { border-color: #3b82f6 !important; outline: none; box-shadow: 0 0 0 2px rgba(59,130,246,0.3); }
+</style>
+</head>
+<body class="min-h-screen text-slate-100 font-sans">
+
+<nav class="bg-slate-900 border-b border-slate-700 px-6 py-3 flex items-center justify-between sticky top-0 z-10">
+  <a href="/app/index.html" class="text-blue-400 font-bold text-lg tracking-tight">SubPaperz</a>
+  <span class="text-slate-400 text-sm">Form W-9</span>
+  <a href="/app/dashboard.html" class="text-slate-400 hover:text-white text-sm">← Dashboard</a>
+</nav>
+
+<div class="max-w-3xl mx-auto px-4 py-8">
+  <div class="flex items-start justify-between mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-white">Form W-9</h1>
+      <p class="text-slate-400 text-sm mt-1">Request for Taxpayer Identification and Certification</p>
+    </div>
+    <span class="bg-blue-900 text-blue-300 text-xs px-3 py-1 rounded-full font-medium">IRS Public Domain Form</span>
+  </div>
+
+  <!-- Explainer -->
+  <div class="bg-slate-800 border border-slate-700 rounded-xl p-4 mb-6">
+    <button onclick="this.nextElementSibling.classList.toggle('hidden')" class="w-full text-left flex items-center justify-between text-slate-300 text-sm font-medium">
+      <span>💡 What is a W-9 and why does your GC need it?</span><span class="text-slate-500">▼</span>
+    </button>
+    <div class="mt-3 text-slate-400 text-sm space-y-2 hidden">
+      <p>Your GC (General Contractor) needs your W-9 to report payments to the IRS. If they pay you $600 or more in a year, they must file a 1099 with your taxpayer information.</p>
+      <p><strong class="text-white">This does NOT mean taxes are withheld from your check.</strong> As a subcontractor, you receive your full payment and are responsible for paying your own taxes quarterly.</p>
+      <p>Your SSN or EIN on this form is only shared with the GC — it is not sent to the IRS directly.</p>
+    </div>
+  </div>
+
+  <form id="w9Form" class="space-y-6">
+
+    <!-- Names -->
+    <div class="bg-slate-800 rounded-xl border border-slate-700 p-6">
+      <h2 class="text-lg font-semibold text-white mb-4">Name & Business Information</h2>
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">1. Name (as shown on your income tax return) *</label>
+          <input type="text" id="name" required placeholder="John Smith" class="w-full rounded-lg border px-3 py-2 text-sm"/>
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">2. Business name / disregarded entity name <span class="text-slate-500">(if different from above)</span></label>
+          <input type="text" id="businessName" placeholder="Smith Electric LLC" class="w-full rounded-lg border px-3 py-2 text-sm"/>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tax Classification -->
+    <div class="bg-slate-800 rounded-xl border border-slate-700 p-6">
+      <h2 class="text-lg font-semibold text-white mb-4">3. Federal Tax Classification *</h2>
+      <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+        <label class="flex items-center gap-2 bg-slate-700 rounded-lg px-3 py-2 cursor-pointer hover:bg-slate-600 transition">
+          <input type="radio" name="taxClass" value="individual" checked class="accent-blue-500"/> <span class="text-sm">Individual / Sole Proprietor</span>
+        </label>
+        <label class="flex items-center gap-2 bg-slate-700 rounded-lg px-3 py-2 cursor-pointer hover:bg-slate-600 transition">
+          <input type="radio" name="taxClass" value="c_corp" class="accent-blue-500"/> <span class="text-sm">C Corporation</span>
+        </label>
+        <label class="flex items-center gap-2 bg-slate-700 rounded-lg px-3 py-2 cursor-pointer hover:bg-slate-600 transition">
+          <input type="radio" name="taxClass" value="s_corp" class="accent-blue-500"/> <span class="text-sm">S Corporation</span>
+        </label>
+        <label class="flex items-center gap-2 bg-slate-700 rounded-lg px-3 py-2 cursor-pointer hover:bg-slate-600 transition">
+          <input type="radio" name="taxClass" value="partnership" class="accent-blue-500"/> <span class="text-sm">Partnership</span>
+        </label>
+        <label class="flex items-center gap-2 bg-slate-700 rounded-lg px-3 py-2 cursor-pointer hover:bg-slate-600 transition">
+          <input type="radio" name="taxClass" value="trust" class="accent-blue-500"/> <span class="text-sm">Trust / Estate</span>
+        </label>
+        <label class="flex items-center gap-2 bg-slate-700 rounded-lg px-3 py-2 cursor-pointer hover:bg-slate-600 transition">
+          <input type="radio" name="taxClass" value="llc" class="accent-blue-500" onchange="document.getElementById('llcTypeRow').classList.toggle('hidden', this.value !== 'llc')"/> <span class="text-sm">LLC</span>
+        </label>
+      </div>
+      <div id="llcTypeRow" class="mt-3 hidden">
+        <label class="block text-xs text-slate-400 mb-1">LLC Tax Treatment</label>
+        <select id="llcType" class="rounded-lg border px-3 py-2 text-sm">
+          <option value="C">C — Taxed as C Corporation</option>
+          <option value="S">S — Taxed as S Corporation</option>
+          <option value="P">P — Taxed as Partnership</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Address -->
+    <div class="bg-slate-800 rounded-xl border border-slate-700 p-6">
+      <h2 class="text-lg font-semibold text-white mb-4">Address</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="md:col-span-2">
+          <label class="block text-xs text-slate-400 mb-1">5. Street Address *</label>
+          <input type="text" id="address" required placeholder="456 Oak Street, Suite 100" class="w-full rounded-lg border px-3 py-2 text-sm"/>
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">City *</label>
+          <input type="text" id="city" required placeholder="Boise" class="w-full rounded-lg border px-3 py-2 text-sm"/>
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">State</label>
+          <select id="state" class="w-full rounded-lg border px-3 py-2 text-sm">
+            <option value="ID">Idaho</option>
+            <option value="SD">South Dakota</option>
+            <option value="NE">Nebraska</option>
+            <option value="KS">Kansas</option>
+            <option value="CO">Colorado</option>
+            <option value="MT">Montana</option>
+            <option value="OK">Oklahoma</option>
+            <option value="NH">New Hampshire</option>
+            <option value="ND">North Dakota</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">ZIP Code *</label>
+          <input type="text" id="zip" required placeholder="83702" maxlength="10" class="w-full rounded-lg border px-3 py-2 text-sm"/>
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">Requester's Name & Address <span class="text-slate-500">(optional)</span></label>
+          <input type="text" id="requesterInfo" placeholder="GC Company, 789 Builder Ave" class="w-full rounded-lg border px-3 py-2 text-sm"/>
+        </div>
+      </div>
+    </div>
+
+    <!-- TIN -->
+    <div class="bg-slate-800 rounded-xl border border-slate-700 p-6">
+      <h2 class="text-lg font-semibold text-white mb-1">Part I — Taxpayer Identification Number *</h2>
+      <p class="text-slate-400 text-sm mb-4">Enter your SSN <strong>or</strong> EIN — not both. For sole proprietors, use your SSN.</p>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <div class="flex items-center gap-2 mb-2">
+            <input type="radio" name="tinType" id="useSsn" value="ssn" checked onchange="toggleTIN()" class="accent-blue-500"/>
+            <label for="useSsn" class="text-sm text-slate-300">Social Security Number (SSN)</label>
+          </div>
+          <input type="text" id="ssn" placeholder="XXX-XX-XXXX" maxlength="11" oninput="formatSSN(this)" class="w-full rounded-lg border px-3 py-2 text-sm font-mono tracking-widest"/>
+        </div>
+        <div>
+          <div class="flex items-center gap-2 mb-2">
+            <input type="radio" name="tinType" id="useEin" value="ein" onchange="toggleTIN()" class="accent-blue-500"/>
+            <label for="useEin" class="text-sm text-slate-300">Employer Identification Number (EIN)</label>
+          </div>
+          <input type="text" id="ein" placeholder="XX-XXXXXXX" maxlength="10" oninput="formatEIN(this)" disabled class="w-full rounded-lg border px-3 py-2 text-sm font-mono tracking-widest opacity-50"/>
+        </div>
+      </div>
+    </div>
+
+    <!-- Certification & Signature -->
+    <div class="bg-slate-800 rounded-xl border border-slate-700 p-6">
+      <h2 class="text-lg font-semibold text-white mb-3">Part II — Certification</h2>
+      <div class="bg-slate-700/50 rounded-lg p-4 text-slate-300 text-xs leading-relaxed mb-4">
+        Under penalties of perjury, I certify that: (1) The number shown on this form is my correct taxpayer identification number; (2) I am not subject to backup withholding; (3) I am a U.S. citizen or other U.S. person; (4) The FATCA code(s) entered on this form (if any) indicating that I am exempt from FATCA reporting is correct.
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">Printed Name</label>
+          <input type="text" id="signerName" placeholder="John Smith" class="w-full rounded-lg border px-3 py-2 text-sm"/>
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">Date</label>
+          <input type="date" id="signDate" class="w-full rounded-lg border px-3 py-2 text-sm"/>
+        </div>
+      </div>
+      <label class="block text-xs text-slate-400 mb-2">Signature of U.S. person *</label>
+      <canvas id="sigPad" class="sig-canvas" data-signature-pad></canvas>
+      <button type="button" onclick="if(sigInstance) sigInstance.clear()" class="mt-2 text-xs text-slate-400 hover:text-white underline">Clear Signature</button>
+    </div>
+
+    <p class="text-slate-500 text-xs text-center">This is a functional W-9 equivalent for use between parties. It is not submitted to the IRS. SubPaperz does not provide tax advice.</p>
+
+    <!-- Actions -->
+    <div class="flex flex-wrap gap-3 pb-8">
+      <button type="button" onclick="downloadPDF()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold text-sm shadow-lg">⬇ Download PDF</button>
+      <button type="button" onclick="clearForm()" class="border border-slate-600 text-slate-300 hover:text-white px-6 py-3 rounded-lg text-sm">Clear Form</button>
+    </div>
+  </form>
+</div>
+
+<script src="/js/config.js"></script>
+<script src="/js/pdf-w9.js"></script>
+<script src="/js/esign.js"></script>
+<script>
+let sigInstance = null;
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('signDate').value = new Date().toISOString().split('T')[0];
+  sigInstance = new ESignature('sigPad', { label:'Signature', required:true });
+  sigInstance.init();
+  // Show LLC type row on radio change
+  document.querySelectorAll('input[name="taxClass"]').forEach(r => {
+    r.addEventListener('change', () => {
+      document.getElementById('llcTypeRow').classList.toggle('hidden', r.value !== 'llc' || !r.checked);
+    });
+  });
+});
+
+function toggleTIN() {
+  const useSsn = document.getElementById('useSsn').checked;
+  document.getElementById('ssn').disabled = !useSsn;
+  document.getElementById('ein').disabled = useSsn;
+  document.getElementById('ssn').classList.toggle('opacity-50', !useSsn);
+  document.getElementById('ein').classList.toggle('opacity-50', useSsn);
+}
+
+function formatSSN(el) {
+  let v = el.value.replace(/\D/g,'');
+  if (v.length > 3) v = v.slice(0,3) + '-' + v.slice(3);
+  if (v.length > 6) v = v.slice(0,6) + '-' + v.slice(6);
+  el.value = v.slice(0,11);
+}
+
+function formatEIN(el) {
+  let v = el.value.replace(/\D/g,'');
+  if (v.length > 2) v = v.slice(0,2) + '-' + v.slice(2);
+  el.value = v.slice(0,10);
+}
+
+function getFormData() {
+  const taxClass = document.querySelector('input[name="taxClass"]:checked')?.value || 'individual';
+  return {
+    name: document.getElementById('name').value,
+    businessName: document.getElementById('businessName').value,
+    taxClassification: taxClass,
+    llcType: taxClass === 'llc' ? document.getElementById('llcType').value : '',
+    address: document.getElementById('address').value,
+    city: document.getElementById('city').value,
+    state: document.getElementById('state').value,
+    zip: document.getElementById('zip').value,
+    requesterInfo: document.getElementById('requesterInfo').value,
+    tinType: document.getElementById('useSsn').checked ? 'ssn' : 'ein',
+    ssn: document.getElementById('ssn').value,
+    ein: document.getElementById('ein').value,
+    signerName: document.getElementById('signerName').value,
+    signDate: document.getElementById('signDate').value,
+  };
+}
+
+function downloadPDF() {
+  const fd = getFormData();
+  if (!fd.name) { alert('Please enter your name.'); return; }
+  const sig = sigInstance ? sigInstance.getDataURL() : null;
+  const doc = window.generateW9PDF(fd, sig);
+  doc.save(`w9-${(fd.name||'subpaperz').replace(/\s+/g,'-').toLowerCase()}.pdf`);
+}
+
+function clearForm() {
+  if (confirm('Clear all form data?')) {
+    document.getElementById('w9Form').reset();
+    if (sigInstance) sigInstance.clear();
+    document.getElementById('signDate').value = new Date().toISOString().split('T')[0];
+  }
+}
+</script>
+</body>
+</html>

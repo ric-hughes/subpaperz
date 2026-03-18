@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Lien Waiver — SubPaperz</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
+<link rel="manifest" href="/manifest.json"/>
+<style>
+  body { background: #0f172a; }
+  .sig-canvas { border: 2px dashed #94a3b8; background: white; cursor: crosshair; width: 100%; height: 140px; border-radius: 8px; }
+  input, select, textarea { background: #1e293b !important; color: #f1f5f9 !important; border-color: #334155 !important; }
+  input:focus, select:focus, textarea:focus { border-color: #3b82f6 !important; outline: none; box-shadow: 0 0 0 2px rgba(59,130,246,0.3); }
+</style>
+</head>
+<body class="min-h-screen text-slate-100 font-sans">
+
+<nav class="bg-slate-900 border-b border-slate-700 px-6 py-3 flex items-center justify-between sticky top-0 z-10">
+  <a href="/app/index.html" class="text-blue-400 font-bold text-lg tracking-tight">SubPaperz</a>
+  <span id="navTitle" class="text-slate-400 text-sm">Lien Waiver</span>
+  <a href="/app/dashboard.html" class="text-slate-400 hover:text-white text-sm">← Dashboard</a>
+</nav>
+
+<div class="max-w-3xl mx-auto px-4 py-8">
+
+  <!-- Type selector -->
+  <div class="mb-6">
+    <label class="block text-slate-300 text-sm font-medium mb-2">Lien Waiver Type</label>
+    <select id="waiverType" onchange="onTypeChange()" class="w-full rounded-lg border px-3 py-2 text-sm font-medium">
+      <option value="conditional_progress">Conditional Waiver — Progress Payment</option>
+      <option value="unconditional_progress">Unconditional Waiver — Progress Payment</option>
+      <option value="conditional_final">Conditional Waiver — Final Payment</option>
+      <option value="unconditional_final">Unconditional Waiver — Final Payment</option>
+    </select>
+  </div>
+
+  <!-- Lien Rights Educator (key differentiator) -->
+  <div id="educatorPanel" class="mb-6 rounded-xl border p-4 transition-all"></div>
+
+  <!-- Final payment warning -->
+  <div id="finalWarning" class="hidden mb-4 bg-red-900/40 border border-red-500 rounded-lg px-4 py-3 text-red-300 text-sm font-semibold">
+    ⚠️ FINAL WAIVER: This permanently waives ALL remaining lien rights on this project. Only sign after confirming full payment has cleared your bank account.
+  </div>
+
+  <form id="lienForm" class="space-y-6">
+
+    <!-- Parties & Project -->
+    <div class="bg-slate-800 rounded-xl border border-slate-700 p-6">
+      <h2 class="text-lg font-semibold text-white mb-4">Parties & Project</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="md:col-span-2">
+          <label class="block text-xs text-slate-400 mb-1">Claimant Name (Subcontractor) *</label>
+          <input type="text" id="claimantName" required placeholder="Your Company Name" class="w-full rounded-lg border px-3 py-2 text-sm"/>
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">Claimant Address *</label>
+          <input type="text" id="claimantAddress" required placeholder="123 Main St, Boise, ID 83702" class="w-full rounded-lg border px-3 py-2 text-sm"/>
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">Owner Name *</label>
+          <input type="text" id="ownerName" required placeholder="Property Owner or LLC" class="w-full rounded-lg border px-3 py-2 text-sm"/>
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">General Contractor Name *</label>
+          <input type="text" id="gcName" required placeholder="GC Company Name" class="w-full rounded-lg border px-3 py-2 text-sm"/>
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">Property / Project Description *</label>
+          <input type="text" id="propertyDescription" required placeholder="123 Oak Ave, Boise, ID — Office Build-out" class="w-full rounded-lg border px-3 py-2 text-sm"/>
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">Through Date (work covered through) *</label>
+          <input type="date" id="throughDate" required class="w-full rounded-lg border px-3 py-2 text-sm"/>
+        </div>
+        <div id="amountField">
+          <label class="block text-xs text-slate-400 mb-1">Payment Amount ($) *</label>
+          <input type="number" id="amount" placeholder="0.00" class="w-full rounded-lg border px-3 py-2 text-sm"/>
+          <p class="text-xs text-slate-500 mt-1">This waiver is conditioned upon receipt of this amount.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Exceptions (conditional types only) -->
+    <div id="exceptionsSection" class="bg-slate-800 rounded-xl border border-slate-700 p-6">
+      <h2 class="text-lg font-semibold text-white mb-2">Exceptions</h2>
+      <p class="text-slate-400 text-sm mb-3">List any claims, disputed items, or amounts NOT covered by this waiver. Leave blank or check "None" if there are no exceptions.</p>
+      <div class="flex items-center gap-2 mb-3">
+        <input type="checkbox" id="noExceptions" onchange="document.getElementById('exceptions').disabled=this.checked; if(this.checked) document.getElementById('exceptions').value=''" class="rounded"/>
+        <label for="noExceptions" class="text-sm text-slate-300">No exceptions — this waiver covers everything through the through date</label>
+      </div>
+      <textarea id="exceptions" rows="3" placeholder="List any exceptions here (e.g., 'Change Order #3 for $4,500 not yet approved')" class="w-full rounded-lg border px-3 py-2 text-sm"></textarea>
+    </div>
+
+    <!-- Legal Language Preview -->
+    <div class="bg-slate-800 rounded-xl border border-slate-700 p-6">
+      <h2 class="text-lg font-semibold text-white mb-3">Release Language</h2>
+      <p class="text-slate-400 text-xs mb-3">This is the legal text that will appear on your waiver. It is automatically updated based on the type selected above.</p>
+      <div id="legalPreview" class="bg-slate-900 rounded-lg p-4 text-xs text-slate-300 leading-relaxed whitespace-pre-wrap font-mono border border-slate-700 max-h-48 overflow-y-auto"></div>
+    </div>
+
+    <!-- Signature -->
+    <div class="bg-slate-800 rounded-xl border border-slate-700 p-6">
+      <h2 class="text-lg font-semibold text-white mb-3">Signature</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">Printed Name & Title</label>
+          <input type="text" id="signerName" placeholder="Jane Smith, Owner" class="w-full rounded-lg border px-3 py-2 text-sm"/>
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">Date</label>
+          <input type="date" id="signDate" class="w-full rounded-lg border px-3 py-2 text-sm"/>
+        </div>
+      </div>
+      <label class="block text-xs text-slate-400 mb-2">Signature *</label>
+      <canvas id="sigPad" class="sig-canvas" data-signature-pad></canvas>
+      <button type="button" onclick="if(sigInstance) sigInstance.clear()" class="mt-2 text-xs text-slate-400 hover:text-white underline">Clear Signature</button>
+    </div>
+
+    <!-- Lien Deadline Calculator -->
+    <div class="bg-slate-800 rounded-xl border border-slate-700 p-6">
+      <h2 class="text-lg font-semibold text-white mb-1">Lien Deadline Calculator</h2>
+      <p class="text-slate-400 text-sm mb-4">Know your deadline before you waive anything. Enter your last day of work to see how long you have to file a mechanic's lien if needed.</p>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">Last Day Worked</label>
+          <input type="date" id="lastDayWorked" onchange="calcDeadline()" class="w-full rounded-lg border px-3 py-2 text-sm"/>
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">State</label>
+          <select id="deadlineState" onchange="calcDeadline()" class="w-full rounded-lg border px-3 py-2 text-sm">
+            <option value="ID">Idaho</option>
+            <option value="SD">South Dakota</option>
+            <option value="NE">Nebraska</option>
+            <option value="KS">Kansas</option>
+            <option value="CO">Colorado</option>
+            <option value="MT">Montana</option>
+            <option value="OK">Oklahoma</option>
+            <option value="NH">New Hampshire</option>
+            <option value="ND">North Dakota</option>
+          </select>
+        </div>
+      </div>
+      <div id="deadlineResult" class="hidden rounded-lg p-4 text-center">
+        <p class="text-sm text-slate-400">Lien filing deadline:</p>
+        <p id="deadlineDate" class="text-2xl font-bold my-1"></p>
+        <p id="deadlineCountdown" class="text-sm font-semibold"></p>
+        <p class="text-xs text-slate-500 mt-2">This is an estimate based on standard state deadlines. Consult an attorney to confirm your specific situation.</p>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="flex flex-wrap gap-3 pb-8">
+      <button type="button" onclick="downloadPDF()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold text-sm shadow-lg">⬇ Download PDF</button>
+      <button type="button" onclick="clearForm()" class="border border-slate-600 text-slate-300 hover:text-white px-6 py-3 rounded-lg text-sm">Clear Form</button>
+    </div>
+  </form>
+</div>
+
+<script src="/js/config.js"></script>
+<script src="/js/pdf-lien-waiver.js"></script>
+<script src="/js/esign.js"></script>
+<script>
+let sigInstance = null;
+
+const DEADLINE_DAYS = { ID:90, SD:120, NE:120, KS:120, CO:120, MT:90, OK:185, NH:120, ND:90 };
+
+const EDUCATOR = {
+  conditional_progress: { color:'blue', icon:'ℹ️', text:'<strong>Safer option.</strong> This waiver only takes effect when you actually receive and cash the check. If the check bounces or payment is not received, your lien rights are fully restored. Use this for all draw payments.' },
+  unconditional_progress: { color:'yellow', icon:'⚠️', text:'<strong>Use with caution.</strong> This releases your lien rights for this payment period unconditionally — whether or not you have been paid. Only sign this after confirming payment has cleared your bank account.' },
+  conditional_final: { color:'blue', icon:'ℹ️', text:'<strong>Final payment — conditional.</strong> This waiver only takes effect upon receipt and clearance of the final payment check. It is the safer choice for closing out a project. List any unresolved items in the Exceptions field below.' },
+  unconditional_final: { color:'red', icon:'🚨', text:'<strong>PERMANENT RELEASE.</strong> By signing this, you permanently and unconditionally waive all remaining lien rights on this project — regardless of payment status. Only sign this after you have confirmed final payment has fully cleared your bank.' },
+};
+
+function onTypeChange() {
+  const type = document.getElementById('waiverType').value;
+  const isFinal = type.includes('final');
+  const isConditional = type.includes('conditional');
+  const isUnconditional = type.includes('unconditional');
+
+  // Show/hide amount field
+  document.getElementById('amountField').style.display = isUnconditional && isFinal ? 'none' : 'block';
+
+  // Show/hide exceptions
+  document.getElementById('exceptionsSection').style.display = isConditional ? 'block' : 'none';
+
+  // Final warning
+  document.getElementById('finalWarning').classList.toggle('hidden', !isFinal);
+
+  // Educator panel
+  const e = EDUCATOR[type];
+  const colors = { blue:'bg-blue-900/30 border-blue-700 text-blue-200', yellow:'bg-yellow-900/30 border-yellow-600 text-yellow-200', red:'bg-red-900/40 border-red-500 text-red-200' };
+  document.getElementById('educatorPanel').className = `mb-6 rounded-xl border p-4 ${colors[e.color]}`;
+  document.getElementById('educatorPanel').innerHTML = `<div class="flex gap-3"><span class="text-xl">${e.icon}</span><div><p class="text-sm">${e.text}</p></div></div>`;
+
+  // Legal preview
+  updateLegalPreview();
+}
+
+function updateLegalPreview() {
+  const type = document.getElementById('waiverType').value;
+  const d = {
+    claimantName: document.getElementById('claimantName').value || '[Claimant Name]',
+    gcName: document.getElementById('gcName').value || '[GC Name]',
+    ownerName: document.getElementById('ownerName').value || '[Owner Name]',
+    propertyDescription: document.getElementById('propertyDescription').value || '[Property Description]',
+    amount: document.getElementById('amount')?.value || '[Amount]',
+    throughDate: document.getElementById('throughDate').value || '[Through Date]',
+    exceptions: document.getElementById('exceptions')?.value || 'None',
+  };
+  const langFn = window.LIEN_LANG?.[type];
+  document.getElementById('legalPreview').textContent = langFn ? langFn(d) : '';
+}
+
+function calcDeadline() {
+  const lastDay = document.getElementById('lastDayWorked').value;
+  const state = document.getElementById('deadlineState').value;
+  if (!lastDay) return;
+  const days = DEADLINE_DAYS[state] || 90;
+  const d = new Date(lastDay);
+  d.setDate(d.getDate() + days);
+  const daysLeft = Math.ceil((d - new Date()) / 86400000);
+  const result = document.getElementById('deadlineResult');
+  result.classList.remove('hidden');
+  document.getElementById('deadlineDate').textContent = d.toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
+  const countdown = document.getElementById('deadlineCountdown');
+  if (daysLeft < 0) { countdown.textContent = `EXPIRED ${Math.abs(daysLeft)} days ago`; countdown.className = 'text-sm font-semibold text-red-400'; result.className = 'rounded-lg p-4 text-center bg-red-900/30 border border-red-600'; }
+  else if (daysLeft <= 30) { countdown.textContent = `⚠️ ${daysLeft} days remaining — act soon`; countdown.className = 'text-sm font-semibold text-yellow-400'; result.className = 'rounded-lg p-4 text-center bg-yellow-900/30 border border-yellow-600'; }
+  else { countdown.textContent = `${daysLeft} days remaining`; countdown.className = 'text-sm font-semibold text-green-400'; result.className = 'rounded-lg p-4 text-center bg-green-900/30 border border-green-600'; }
+}
+
+function getFormData() {
+  const type = document.getElementById('waiverType').value;
+  const d = {
+    type,
+    claimantName: document.getElementById('claimantName').value,
+    claimantAddress: document.getElementById('claimantAddress').value,
+    ownerName: document.getElementById('ownerName').value,
+    gcName: document.getElementById('gcName').value,
+    propertyDescription: document.getElementById('propertyDescription').value,
+    throughDate: document.getElementById('throughDate').value,
+    amount: document.getElementById('amount')?.value || '',
+    exceptions: document.getElementById('noExceptions')?.checked ? 'None' : (document.getElementById('exceptions')?.value || 'None'),
+    signDate: document.getElementById('signDate').value,
+  };
+  return d;
+}
+
+function downloadPDF() {
+  const fd = getFormData();
+  if (!fd.claimantName || !fd.gcName || !fd.throughDate) { alert('Please fill in all required fields.'); return; }
+  const sig = sigInstance ? sigInstance.getDataURL() : null;
+  const doc = window.generateLienWaiverPDF(fd, sig);
+  const typeName = window.TYPE_TITLES[fd.type] || 'lien-waiver';
+  doc.save(`${typeName.toLowerCase().replace(/\s+/g,'-')}.pdf`);
+}
+
+function clearForm() {
+  if (confirm('Clear all form data?')) {
+    document.getElementById('lienForm').reset();
+    if (sigInstance) sigInstance.clear();
+    onTypeChange();
+  }
+}
+
+// Init
+document.addEventListener('DOMContentLoaded', () => {
+  // Read type from URL param
+  const params = new URLSearchParams(window.location.search);
+  const t = params.get('type');
+  if (t && document.querySelector(`#waiverType option[value="${t}"]`)) {
+    document.getElementById('waiverType').value = t;
+  }
+  document.getElementById('signDate').value = new Date().toISOString().split('T')[0];
+  onTypeChange();
+
+  sigInstance = new ESignature('sigPad', { label:'Signature', required:true });
+  sigInstance.init();
+
+  // Live preview updates
+  document.querySelectorAll('#lienForm input, #lienForm textarea').forEach(el => {
+    el.addEventListener('input', updateLegalPreview);
+  });
+});
+</script>
+</body>
+</html>

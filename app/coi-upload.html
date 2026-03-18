@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Upload Your COI Renewal — SubPaperz</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+body { background:#0f172a; }
+input,select { background:#1e293b!important; color:#f1f5f9!important; border-color:#334155!important; }
+input:focus { border-color:#3b82f6!important; outline:none; }
+</style>
+</head>
+<body class="min-h-screen text-slate-100 font-sans flex flex-col items-center justify-center px-4 py-12">
+
+<div class="w-full max-w-lg">
+  <!-- Logo -->
+  <div class="text-center mb-8">
+    <a href="https://subpaperz.com" class="text-blue-400 font-bold text-2xl tracking-tight">SubPaperz</a>
+    <p class="text-slate-500 text-sm mt-1">Subcontractor Paperwork Platform</p>
+  </div>
+
+  <!-- Loading state -->
+  <div id="loadingState" class="bg-slate-800 rounded-2xl border border-slate-700 p-8 text-center">
+    <div class="text-slate-400 text-sm">Loading your upload form...</div>
+  </div>
+
+  <!-- Error state -->
+  <div id="errorState" class="hidden bg-slate-800 rounded-2xl border border-red-800 p-8 text-center">
+    <div class="text-4xl mb-4">⚠️</div>
+    <h2 class="text-white font-bold text-lg mb-2">Link Not Valid</h2>
+    <p class="text-slate-400 text-sm" id="errorMsg">This upload link has expired or is invalid. Please contact your general contractor for a new link.</p>
+  </div>
+
+  <!-- Upload form -->
+  <div id="uploadForm" class="hidden bg-slate-800 rounded-2xl border border-slate-700">
+    <div class="px-6 py-5 border-b border-slate-700">
+      <h1 class="text-white font-bold text-xl">Upload Your COI Renewal</h1>
+      <p class="text-slate-400 text-sm mt-1" id="subInfo"></p>
+    </div>
+
+    <div class="p-6 space-y-5">
+      <!-- Current COI info -->
+      <div class="bg-slate-900 rounded-xl border border-slate-700 px-4 py-3 text-sm">
+        <div class="text-slate-400 text-xs uppercase tracking-wider mb-2 font-semibold">Current COI on File</div>
+        <div class="grid grid-cols-2 gap-2 text-sm">
+          <div><span class="text-slate-500">Insurer:</span> <span class="text-slate-200" id="currentInsurer">—</span></div>
+          <div><span class="text-slate-500">Expires:</span> <span class="text-red-400 font-semibold" id="currentExpiry">—</span></div>
+        </div>
+      </div>
+
+      <!-- New COI file -->
+      <div>
+        <label class="block text-xs text-slate-400 mb-1.5 font-semibold">New COI File (PDF or image) *</label>
+        <input type="file" id="newCoiFile" accept=".pdf,image/*"
+          class="w-full rounded-lg border px-3 py-2 text-sm file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-blue-900 file:text-blue-300 hover:file:bg-blue-800"/>
+      </div>
+
+      <!-- New expiry date -->
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs text-slate-400 mb-1.5 font-semibold">New Expiry Date *</label>
+          <input type="date" id="newExpiry" class="w-full rounded-lg border px-3 py-2 text-sm"/>
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1.5 font-semibold">New Insurer Name</label>
+          <input type="text" id="newInsurer" placeholder="Same as before" class="w-full rounded-lg border px-3 py-2 text-sm"/>
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-xs text-slate-400 mb-1.5 font-semibold">New Policy Number</label>
+        <input type="text" id="newPolicyNum" placeholder="Optional" class="w-full rounded-lg border px-3 py-2 text-sm"/>
+      </div>
+
+      <div id="uploadError" class="hidden bg-red-900/40 border border-red-600 text-red-300 rounded-lg px-3 py-2 text-sm"></div>
+    </div>
+
+    <div class="px-6 py-4 border-t border-slate-700">
+      <button id="submitBtn" onclick="submitRenewal()"
+        class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-xl text-sm font-bold transition-colors">
+        Submit COI Renewal
+      </button>
+      <p class="text-center text-xs text-slate-500 mt-3">Your file is stored securely. Your GC will be notified automatically.</p>
+    </div>
+  </div>
+
+  <!-- Success state -->
+  <div id="successState" class="hidden bg-slate-800 rounded-2xl border border-green-800 p-8 text-center">
+    <div class="text-5xl mb-4">✅</div>
+    <h2 class="text-white font-bold text-xl mb-2">COI Uploaded Successfully</h2>
+    <p class="text-slate-400 text-sm">Your updated Certificate of Insurance has been received. Your general contractor's records have been updated automatically.</p>
+    <p class="text-slate-500 text-xs mt-4">You can close this window.</p>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/js/config.js"></script>
+<script>
+// Initialize Supabase with anon key (no auth needed)
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let coiRecord = null;
+
+async function init() {
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get('token');
+
+  if (!token) {
+    showError('No upload token found. Please use the link from your email.');
+    return;
+  }
+
+  try {
+    const { data, error } = await db
+      .from('coi_records')
+      .select('*, subcontractors(company_name, contact_name)')
+      .eq('upload_token', token)
+      .single();
+
+    if (error || !data) {
+      showError('This upload link is invalid or has already been used. Please contact your general contractor for a new link.');
+      return;
+    }
+
+    coiRecord = data;
+    showForm();
+  } catch (e) {
+    showError('Something went wrong loading your form. Please try again or contact your general contractor.');
+  }
+}
+
+function showError(msg) {
+  document.getElementById('loadingState').classList.add('hidden');
+  document.getElementById('errorMsg').textContent = msg;
+  document.getElementById('errorState').classList.remove('hidden');
+}
+
+function showForm() {
+  document.getElementById('loadingState').classList.add('hidden');
+  const sub = coiRecord.subcontractors;
+  const subName = sub?.contact_name || sub?.company_name || 'Subcontractor';
+  document.getElementById('subInfo').textContent = `Uploading for: ${subName}`;
+  document.getElementById('currentInsurer').textContent = coiRecord.insurer_name || '—';
+  document.getElementById('currentExpiry').textContent = coiRecord.expiry_date || '—';
+  // Pre-fill insurer
+  document.getElementById('newInsurer').placeholder = coiRecord.insurer_name || 'Same as before';
+  document.getElementById('uploadForm').classList.remove('hidden');
+}
+
+async function submitRenewal() {
+  const file = document.getElementById('newCoiFile').files[0];
+  const newExpiry = document.getElementById('newExpiry').value;
+  const errEl = document.getElementById('uploadError');
+
+  if (!file) { errEl.textContent = 'Please select a COI file to upload.'; errEl.classList.remove('hidden'); return; }
+  if (!newExpiry) { errEl.textContent = 'Please enter the new expiry date.'; errEl.classList.remove('hidden'); return; }
+
+  errEl.classList.add('hidden');
+  const btn = document.getElementById('submitBtn');
+  btn.textContent = 'Uploading...';
+  btn.disabled = true;
+
+  try {
+    // Upload file to storage using the token as a path segment
+    const ext = file.name.split('.').pop();
+    const path = 'public/coi-renewals/' + coiRecord.upload_token + '/coi_renewal_' + Date.now() + '.' + ext;
+    const { error: storageErr } = await db.storage.from('coi-uploads').upload(path, file, { contentType: file.type, upsert: true });
+    if (storageErr) throw storageErr;
+
+    // Update the COI record
+    const updates = {
+      storage_path: path,
+      expiry_date: newExpiry,
+      reminder_30_sent: false,
+      upload_token: null, // one-time use — invalidate after upload
+    };
+    if (document.getElementById('newInsurer').value.trim()) updates.insurer_name = document.getElementById('newInsurer').value.trim();
+    if (document.getElementById('newPolicyNum').value.trim()) updates.policy_number = document.getElementById('newPolicyNum').value.trim();
+
+    const { error: updateErr } = await db.from('coi_records').update(updates).eq('id', coiRecord.id).eq('upload_token', coiRecord.upload_token);
+    if (updateErr) throw updateErr;
+
+    document.getElementById('uploadForm').classList.add('hidden');
+    document.getElementById('successState').classList.remove('hidden');
+  } catch (e) {
+    errEl.textContent = 'Upload failed: ' + e.message;
+    errEl.classList.remove('hidden');
+    btn.textContent = 'Submit COI Renewal';
+    btn.disabled = false;
+  }
+}
+
+init();
+</script>
+</body>
+</html>

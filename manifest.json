@@ -1,0 +1,91 @@
+{
+  "name": "SubPaperz",
+  "short_name": "SubPaperz",
+  "description": "Subcontractor paperwork platform — W-9s, lien waivers, COI tracking, e-signatures.",
+  "start_url": "/app/index.html",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0f172a",
+  "theme_color": "#1d4ed8",
+  "categories": ["business", "productivity"],
+  "lang": "en-US",
+  "icons": [
+    {
+      "src": "/icons/icon-72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/dashboard.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "label": "SubPaperz Compliance Dashboard"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "New W-9",
+      "short_name": "W-9",
+      "url": "/forms/w9.html",
+      "description": "Start a new W-9 collection"
+    },
+    {
+      "name": "New Lien Waiver",
+      "short_name": "Lien Waiver",
+      "url": "/app/forms/lien-waiver.html",
+      "description": "Create a lien waiver"
+    },
+    {
+      "name": "COI Tracker",
+      "short_name": "COI",
+      "url": "/app/coi-tracker.html",
+      "description": "View COI expiry alerts"
+    }
+  ]
+}

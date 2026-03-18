@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Subcontractor Agreement — SubPaperz</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
+<link rel="manifest" href="/manifest.json"/>
+<style>
+  body { background: #0f172a; }
+  .sig-canvas { border: 2px dashed #94a3b8; background: white; cursor: crosshair; width: 100%; height: 140px; border-radius: 8px; }
+  input, select, textarea { background: #1e293b !important; color: #f1f5f9 !important; border-color: #334155 !important; }
+  input:focus, select:focus, textarea:focus { border-color: #3b82f6 !important; outline: none; box-shadow: 0 0 0 2px rgba(59,130,246,0.3); }
+</style>
+</head>
+<body class="min-h-screen text-slate-100 font-sans">
+
+<nav class="bg-slate-900 border-b border-slate-700 px-6 py-3 flex items-center justify-between sticky top-0 z-10">
+  <a href="/app/index.html" class="text-blue-400 font-bold text-lg tracking-tight">SubPaperz</a>
+  <span class="text-slate-400 text-sm">Subcontractor Agreement</span>
+  <a href="/app/dashboard.html" class="text-slate-400 hover:text-white text-sm">← Dashboard</a>
+</nav>
+
+<div class="max-w-3xl mx-auto px-4 py-8">
+  <h1 class="text-2xl font-bold text-white mb-1">Subcontractor Agreement</h1>
+  <p class="text-slate-400 text-sm mb-6">Fill out both parties' information, define scope and terms, then collect e-signatures from both GC and sub.</p>
+
+  <form id="subAgreementForm" class="space-y-6">
+
+    <!-- Parties -->
+    <div class="bg-slate-800 rounded-xl border border-slate-700 p-6">
+      <h2 class="text-lg font-semibold text-white mb-4">1. Parties</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="md:col-span-2"><p class="text-xs text-blue-400 font-semibold uppercase tracking-wider mb-2">General Contractor</p></div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">GC Company Name *</label>
+          <input type="text" id="gcCompany" required class="w-full rounded-lg border px-3 py-2 text-sm"/>
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">GC Address *</label>
+          <input type="text" id="gcAddress" required class="w-full rounded-lg border px-3 py-2 text-sm"/>
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">GC License #</label>
+          <input type="text" id="gcLicense" class="w-full rounded-lg border px-3 py-2 text-sm"/>
+        </div>
+        <div class="md:col-span-2 mt-2"><p class="text-xs text-blue-400 font-semibold uppercase tracking-wider mb-2">Subcontractor</p></div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">Sub Company Name *</label>
+          <input type="text" id="subCompany" required class="w-full rounded-lg border px-3 py-2 text-sm"/>
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">Sub Address *</label>
+          <input type="text" id="subAddress" required class="w-full rounded-lg border px-3 py-2 text-sm"/>
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">Sub License #</label>
+          <input type="text" id="subLicense" class="w-full rounded-lg border px-3 py-2 text-sm"/>
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">Governing State</label>
+          <select id="state" class="w-full rounded-lg border px-3 py-2 text-sm">
+            <option value="Idaho">Idaho</option>
+            <option value="South Dakota">South Dakota</option>
+            <option value="Nebraska">Nebraska</option>
+            <option value="Kansas">Kansas</option>
+            <option value="Colorado">Colorado</option>
+            <option value="Montana">Montana</option>
+            <option value="Oklahoma">Oklahoma</option>
+            <option value="New Hampshire">New Hampshire</option>
+            <option value="North Dakota">North Dakota</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Project -->
+    <div class="bg-slate-800 rounded-xl border border-slate-700 p-6">
+      <h2 class="text-lg font-semibold text-white mb-4">2. Project</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">Project Name *</label>
+          <input type="text" id="projectName" required class="w-full rounded-lg border px-3 py-2 text-sm"/>
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">Project Address *</label>
+          <input type="text" id="projectAddress" required class="w-full rounded-lg border px-3 py-2 text-sm"/>
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">Project Owner</label>
+          <input type="text" id="projectOwner" class="w-full rounded-lg border px-3 py-2 text-sm"/>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scope -->
+    <div class="bg-slate-800 rounded-xl border border-slate-700 p-6">
+      <h2 class="text-lg font-semibold text-white mb-2">3. Scope of Work *</h2>
+      <p class="text-slate-400 text-xs mb-3">Be specific. Include what's included, what's excluded, who supplies materials, and any phasing notes.</p>
+      <textarea id="scopeOfWork" rows="6" required placeholder="Describe the complete scope of work in detail.&#10;&#10;Included: ...&#10;Excluded: ...&#10;Materials supplied by sub: ...&#10;Materials supplied by GC: ..." class="w-full rounded-lg border px-3 py-2 text-sm"></textarea>
+    </div>
+
+    <!-- Price & Payment -->
+    <div class="bg-slate-800 rounded-xl border border-slate-700 p-6">
+      <h2 class="text-lg font-semibold text-white mb-4">4. Contract Price & Payment</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">Total Contract Price ($) *</label>
+          <input type="number" id="contractPrice" required placeholder="0.00" class="w-full rounded-lg border px-3 py-2 text-sm"/>
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">Payment Terms</label>
+          <select id="paymentTerms" class="w-full rounded-lg border px-3 py-2 text-sm">
+            <option>Net 10</option><option>Net 15</option><option selected>Net 30</option>
+            <option>Monthly Draw</option><option>Upon Completion</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">Retainage %</label>
+          <input type="number" id="retainage" value="10" min="0" max="20" class="w-full rounded-lg border px-3 py-2 text-sm"/>
+        </div>
+      </div>
+    </div>
+
+    <!-- Schedule -->
+    <div class="bg-slate-800 rounded-xl border border-slate-700 p-6">
+      <h2 class="text-lg font-semibold text-white mb-4">5. Schedule</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">Start Date</label>
+          <input type="date" id="startDate" class="w-full rounded-lg border px-3 py-2 text-sm"/>
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">Substantial Completion</label>
+          <input type="date" id="substantialCompletion" class="w-full rounded-lg border px-3 py-2 text-sm"/>
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">Final Completion</label>
+          <input type="date" id="finalCompletion" class="w-full rounded-lg border px-3 py-2 text-sm"/>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dispute Resolution -->
+    <div class="bg-slate-800 rounded-xl border border-slate-700 p-6">
+      <h2 class="text-lg font-semibold text-white mb-4">10. Dispute Resolution</h2>
+      <div class="space-y-3">
+        <label class="flex items-start gap-3 bg-slate-700 rounded-lg px-4 py-3 cursor-pointer hover:bg-slate-600 transition">
+          <input type="radio" name="dispute" value="arbitration" checked class="mt-0.5 accent-blue-500"/>
+          <div>
+            <div class="text-sm font-medium text-white">Binding Arbitration (AAA Rules)</div>
+            <div class="text-xs text-slate-400 mt-0.5">Faster and less expensive than litigation. Decision is final. Recommended for most subcontracts.</div>
+          </div>
+        </label>
+        <label class="flex items-start gap-3 bg-slate-700 rounded-lg px-4 py-3 cursor-pointer hover:bg-slate-600 transition">
+          <input type="radio" name="dispute" value="litigation" class="mt-0.5 accent-blue-500"/>
+          <div>
+            <div class="text-sm font-medium text-white">State Court Litigation</div>
+            <div class="text-xs text-slate-400 mt-0.5">Full court process. Slower and more expensive, but provides formal legal record and appeal rights.</div>
+          </div>
+        </label>
+      </div>
+    </div>
+
+    <!-- Special Conditions -->
+    <div class="bg-slate-800 rounded-xl border border-slate-700 p-6">
+      <h2 class="text-lg font-semibold text-white mb-2">Special Conditions <span class="text-slate-500 font-normal text-sm">(optional)</span></h2>
+      <textarea id="specialConditions" rows="3" placeholder="Any additional terms, conditions, or project-specific requirements..." class="w-full rounded-lg border px-3 py-2 text-sm"></textarea>
+    </div>
+
+    <!-- Signatures -->
+    <div class="bg-slate-800 rounded-xl border border-slate-700 p-6">
+      <h2 class="text-lg font-semibold text-white mb-4">Signatures</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <p class="text-blue-400 text-xs font-semibold uppercase tracking-wider mb-3">General Contractor</p>
+          <label class="block text-xs text-slate-400 mb-1">Printed Name & Title</label>
+          <input type="text" id="gcSignerName" placeholder="Jane Smith, President" class="w-full rounded-lg border px-3 py-2 text-sm mb-3"/>
+          <label class="block text-xs text-slate-400 mb-1">Date</label>
+          <input type="date" id="gcSignDate" class="w-full rounded-lg border px-3 py-2 text-sm mb-3"/>
+          <label class="block text-xs text-slate-400 mb-2">GC Signature</label>
+          <canvas id="gcSigPad" class="sig-canvas" data-signature-pad></canvas>
+          <button type="button" onclick="if(gcSig) gcSig.clear()" class="mt-1 text-xs text-slate-400 hover:text-white underline">Clear</button>
+        </div>
+        <div>
+          <p class="text-blue-400 text-xs font-semibold uppercase tracking-wider mb-3">Subcontractor</p>
+          <label class="block text-xs text-slate-400 mb-1">Printed Name & Title</label>
+          <input type="text" id="subSignerName" placeholder="Bob Johnson, Owner" class="w-full rounded-lg border px-3 py-2 text-sm mb-3"/>
+          <label class="block text-xs text-slate-400 mb-1">Date</label>
+          <input type="date" id="subSignDate" class="w-full rounded-lg border px-3 py-2 text-sm mb-3"/>
+          <label class="block text-xs text-slate-400 mb-2">Sub Signature</label>
+          <canvas id="subSigPad" class="sig-canvas" data-signature-pad></canvas>
+          <button type="button" onclick="if(subSig) subSig.clear()" class="mt-1 text-xs text-slate-400 hover:text-white underline">Clear</button>
+        </div>
+      </div>
+    </div>
+
+    <p class="text-slate-500 text-xs text-center">This template is provided for convenience. SubPaperz does not provide legal advice. Have a licensed attorney review before execution for high-value contracts.</p>
+
+    <div class="flex flex-wrap gap-3 pb-8">
+      <button type="button" onclick="downloadPDF()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold text-sm shadow-lg">⬇ Download PDF</button>
+      <button type="button" onclick="clearForm()" class="border border-slate-600 text-slate-300 hover:text-white px-6 py-3 rounded-lg text-sm">Clear Form</button>
+    </div>
+  </form>
+</div>
+
+<script src="/js/config.js"></script>
+<script src="/js/pdf-sub-agreement.js"></script>
+<script src="/js/esign.js"></script>
+<script>
+let gcSig = null, subSig = null;
+document.addEventListener('DOMContentLoaded', () => {
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('gcSignDate').value = today;
+  document.getElementById('subSignDate').value = today;
+  gcSig = new ESignature('gcSigPad', { label:'GC Signature', required:false }); gcSig.init();
+  subSig = new ESignature('subSigPad', { label:'Sub Signature', required:false }); subSig.init();
+});
+
+function getFormData() {
+  return {
+    gcCompany: document.getElementById('gcCompany').value,
+    gcAddress: document.getElementById('gcAddress').value,
+    gcLicense: document.getElementById('gcLicense').value,
+    subCompany: document.getElementById('subCompany').value,
+    subAddress: document.getElementById('subAddress').value,
+    subLicense: document.getElementById('subLicense').value,
+    state: document.getElementById('state').value,
+    projectName: document.getElementById('projectName').value,
+    projectAddress: document.getElementById('projectAddress').value,
+    projectOwner: document.getElementById('projectOwner').value,
+    scopeOfWork: document.getElementById('scopeOfWork').value,
+    contractPrice: document.getElementById('contractPrice').value,
+    paymentTerms: document.getElementById('paymentTerms').value,
+    retainage: document.getElementById('retainage').value,
+    startDate: document.getElementById('startDate').value,
+    substantialCompletion: document.getElementById('substantialCompletion').value,
+    finalCompletion: document.getElementById('finalCompletion').value,
+    disputeResolution: document.querySelector('input[name="dispute"]:checked')?.value || 'arbitration',
+    specialConditions: document.getElementById('specialConditions').value,
+  };
+}
+
+function downloadPDF() {
+  const fd = getFormData();
+  if (!fd.gcCompany || !fd.subCompany || !fd.projectName) { alert('Please fill in required fields.'); return; }
+  const gcSigData = gcSig ? gcSig.getDataURL() : null;
+  const subSigData = subSig ? subSig.getDataURL() : null;
+  const doc = window.generateSubAgreementPDF(fd, gcSigData, subSigData);
+  doc.save(`sub-agreement-${(fd.subCompany||'subpaperz').replace(/\s+/g,'-').toLowerCase()}.pdf`);
+}
+
+function clearForm() {
+  if (confirm('Clear all form data?')) {
+    document.getElementById('subAgreementForm').reset();
+    if (gcSig) gcSig.clear();
+    if (subSig) subSig.clear();
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SubPaperz App</title>
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📄</text></svg>" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/css/app.css" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            navy: { 950: '#020617', 900: '#0f172a', 800: '#1e293b', 700: '#334155' },
+            electric: { 600: '#1d4ed8', 500: '#2563eb', 400: '#3b82f6' }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="h-full bg-slate-950 text-slate-100 antialiased">
+
+  <!-- ═══════════════════════════════════════════════════
+       LOGIN MODAL (shown when unauthenticated)
+  ════════════════════════════════════════════════════ -->
+  <div id="login-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-slate-950/80 backdrop-blur-md"></div>
+    <div class="relative z-10 w-full max-w-sm">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-8 shadow-2xl shadow-black/60">
+        <div class="text-center mb-8">
+          <a href="/" class="text-2xl font-black text-white">Sub<span class="text-blue-500">Paperz</span></a>
+          <p class="text-slate-400 text-sm mt-2">Sign in to your account</p>
+        </div>
+        <div id="login-form-container">
+          <form id="magic-link-form" class="space-y-4">
+            <div>
+              <label for="login-email" class="block text-sm font-semibold text-slate-300 mb-1.5">Email address</label>
+              <input
+                type="email"
+                id="login-email"
+                name="email"
+                required
+                placeholder="you@yourcompany.com"
+                class="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm transition-all"
+              />
+            </div>
+            <button
+              type="submit"
+              id="magic-link-btn"
+              class="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm transition-all flex items-center justify-center gap-2"
+            >
+              <span id="btn-text">Send Magic Link</span>
+              <span id="btn-spinner" class="hidden">
+                <svg class="animate-spin w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                </svg>
+              </span>
+            </button>
+          </form>
+          <div id="magic-link-success" class="hidden text-center py-4">
+            <div class="text-4xl mb-3">📬</div>
+            <p class="text-white font-bold mb-1">Check your email</p>
+            <p class="text-slate-400 text-sm">We sent a sign-in link to <span id="sent-email" class="text-blue-400 font-medium"></span></p>
+            <p class="text-slate-500 text-xs mt-3">Didn't get it? Check your spam folder, or <button id="resend-btn" class="text-blue-400 hover:text-blue-300 underline">resend</button>.</p>
+          </div>
+          <div id="magic-link-error" class="hidden mt-3 p-3 rounded-lg bg-red-950 border border-red-900 text-red-300 text-xs"></div>
+        </div>
+        <p class="text-center text-xs text-slate-600 mt-6">No account yet? <a href="/" class="text-blue-400 hover:text-blue-300">See plans →</a></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       APP SHELL (shown when authenticated)
+  ════════════════════════════════════════════════════ -->
+  <div id="app-shell" class="hidden h-full flex flex-col">
+
+    <!-- Mobile top bar -->
+    <div class="md:hidden flex items-center justify-between bg-slate-900 border-b border-slate-800 px-4 py-3">
+      <span class="text-lg font-black text-white">Sub<span class="text-blue-500">Paperz</span></span>
+      <button id="sidebar-toggle" class="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors" aria-label="Menu">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+    </div>
+
+    <div class="flex flex-1 overflow-hidden">
+      <!-- ─── SIDEBAR ─────────────────────────────────── -->
+      <aside id="sidebar" class="sidebar fixed md:relative inset-y-0 left-0 z-30 w-60 flex flex-col bg-slate-900 border-r border-slate-800 transform -translate-x-full md:translate-x-0 transition-transform duration-200 ease-in-out">
+
+        <!-- Logo -->
+        <div class="h-16 flex items-center px-5 border-b border-slate-800 shrink-0">
+          <a href="/app/index.html" class="text-xl font-black text-white">Sub<span class="text-blue-500">Paperz</span></a>
+        </div>
+
+        <!-- Nav links -->
+        <nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+          <a href="/app/index.html" data-page="dashboard" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors text-slate-400 hover:text-white hover:bg-slate-800">
+            <span class="text-base">📊</span>
+            Dashboard
+          </a>
+          <a href="/app/projects.html" data-page="projects" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors text-slate-400 hover:text-white hover:bg-slate-800">
+            <span class="text-base">🏗️</span>
+            Projects
+          </a>
+          <a href="/app/subs.html" data-page="subcontractors" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors text-slate-400 hover:text-white hover:bg-slate-800">
+            <span class="text-base">👷</span>
+            Subcontractors
+          </a>
+          <a href="/app/documents.html" data-page="documents" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors text-slate-400 hover:text-white hover:bg-slate-800">
+            <span class="text-base">📁</span>
+            Documents
+          </a>
+          <a href="/app/coi-tracker.html" data-page="coi" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors text-slate-400 hover:text-white hover:bg-slate-800">
+            <span class="text-base">🛡️</span>
+            COI Tracker
+          </a>
+          <div class="border-t border-slate-800 pt-3 mt-3">
+            <a href="/app/account.html" data-page="account" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors text-slate-400 hover:text-white hover:bg-slate-800">
+              <span class="text-base">⚙️</span>
+              Account
+            </a>
+          </div>
+        </nav>
+
+        <!-- Bottom: plan badge + logout -->
+        <div class="px-3 py-4 border-t border-slate-800 shrink-0 space-y-2">
+          <div id="plan-badge" class="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-800">
+            <span class="text-xs">🔖</span>
+            <span id="plan-badge-text" class="text-xs font-semibold text-slate-400">Free Plan</span>
+            <a id="plan-upgrade-link" href="/index.html#pricing" class="ml-auto text-xs text-blue-400 hover:text-blue-300 font-medium">Upgrade</a>
+          </div>
+          <button
+            id="logout-btn"
+            class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-red-400 hover:bg-slate-800 transition-colors"
+          >
+            <span class="text-base">🚪</span>
+            Sign Out
+          </button>
+        </div>
+      </aside>
+
+      <!-- Sidebar overlay for mobile -->
+      <div id="sidebar-overlay" class="hidden fixed inset-0 z-20 bg-black/60 md:hidden" id="sidebar-overlay"></div>
+
+      <!-- ─── MAIN CONTENT ───────────────────────────── -->
+      <main class="flex-1 overflow-y-auto bg-slate-950">
+        <div id="app-content" class="p-6 md:p-8">
+          <!-- Loading state -->
+          <div id="content-loading" class="flex items-center justify-center h-64">
+            <div class="flex flex-col items-center gap-3 text-slate-500">
+              <svg class="animate-spin w-8 h-8 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+              </svg>
+              <span class="text-sm">Loading dashboard...</span>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       SCRIPTS
+  ════════════════════════════════════════════════════ -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="/js/config.js"></script>
+  <script src="/js/supabase-client.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/nav.js"></script>
+  <script src="/js/plan.js"></script>
+
+  <script>
+    // ─── App bootstrap ────────────────────────────────
+    document.addEventListener('DOMContentLoaded', async function () {
+
+      // Mobile sidebar toggle
+      const sidebarToggle = document.getElementById('sidebar-toggle');
+      const sidebar       = document.getElementById('sidebar');
+      const overlay       = document.getElementById('sidebar-overlay');
+
+      if (sidebarToggle) {
+        sidebarToggle.addEventListener('click', () => {
+          sidebar.classList.toggle('-translate-x-full');
+          overlay.classList.toggle('hidden');
+        });
+      }
+      if (overlay) {
+        overlay.addEventListener('click', () => {
+          sidebar.classList.add('-translate-x-full');
+          overlay.classList.add('hidden');
+        });
+      }
+
+      // Close sidebar on nav link click (mobile)
+      document.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('click', () => {
+          sidebar.classList.add('-translate-x-full');
+          overlay.classList.add('hidden');
+        });
+      });
+
+      // Logout
+      document.getElementById('logout-btn')?.addEventListener('click', async () => {
+        await signOut();
+      });
+
+      // Magic link form
+      const form       = document.getElementById('magic-link-form');
+      const btnText    = document.getElementById('btn-text');
+      const btnSpinner = document.getElementById('btn-spinner');
+      const errorEl    = document.getElementById('magic-link-error');
+
+      form?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('login-email').value.trim();
+        if (!email) return;
+
+        btnText.textContent = 'Sending...';
+        btnSpinner.classList.remove('hidden');
+        errorEl.classList.add('hidden');
+        document.getElementById('magic-link-btn').disabled = true;
+
+        const result = await signInWithMagicLink(email);
+
+        btnSpinner.classList.add('hidden');
+        document.getElementById('magic-link-btn').disabled = false;
+        btnText.textContent = 'Send Magic Link';
+
+        if (result.error) {
+          errorEl.textContent = result.error.message || 'Something went wrong. Please try again.';
+          errorEl.classList.remove('hidden');
+        } else {
+          document.getElementById('sent-email').textContent = email;
+          form.classList.add('hidden');
+          document.getElementById('magic-link-success').classList.remove('hidden');
+        }
+      });
+
+      document.getElementById('resend-btn')?.addEventListener('click', () => {
+        document.getElementById('magic-link-success').classList.add('hidden');
+        form.classList.remove('hidden');
+      });
+
+      // ─── Auth check ───────────────────────────────
+      const user = await checkAuth();
+
+      if (!user) {
+        // Show login modal
+        document.getElementById('login-modal').classList.remove('hidden');
+        return;
+      }
+
+      // User is authenticated — show app shell
+      document.getElementById('app-shell').classList.remove('hidden');
+
+      // Set active nav item
+      if (typeof setActiveNav === 'function') setActiveNav();
+
+      // Load plan badge
+      if (typeof setPlanBadge === 'function') await setPlanBadge();
+
+      // Enforce plan gates
+      if (typeof enforcePlanGates === 'function') await enforcePlanGates();
+
+      // Load dashboard content into #app-content
+      document.getElementById('content-loading').classList.add('hidden');
+
+      // Fetch dashboard.html and inject into app-content
+      try {
+        const resp = await fetch('/app/dashboard.html');
+        if (resp.ok) {
+          const html = await resp.text();
+          // Extract body content only (between <body> tags if present)
+          const bodyMatch = html.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+          document.getElementById('app-content').innerHTML = bodyMatch ? bodyMatch[1] : html;
+        } else {
+          document.getElementById('app-content').innerHTML = `
+            <div class="text-center text-slate-500 py-16">
+              <p class="text-4xl mb-3">📊</p>
+              <p class="font-semibold text-white mb-1">Welcome to SubPaperz</p>
+              <p class="text-sm">Your dashboard is loading...</p>
+            </div>`;
+        }
+      } catch (err) {
+        document.getElementById('app-content').innerHTML = `
+          <div class="text-center text-slate-500 py-16">
+            <p class="text-4xl mb-3">📊</p>
+            <p class="font-semibold text-white mb-1">Welcome to SubPaperz</p>
+            <p class="text-sm">Start by adding a project or subcontractor.</p>
+          </div>`;
+      }
+    });
+  </script>
+</body>
+</html>

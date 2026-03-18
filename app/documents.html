@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Documents — SubPaperz</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="manifest" href="/manifest.json"/>
+<style>
+body{background:#0f172a;}
+select{background:#1e293b!important;color:#f1f5f9!important;border-color:#334155!important;}
+select:focus{border-color:#3b82f6!important;outline:none;}
+.modal-bg{background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);}
+</style>
+</head>
+<body class="min-h-screen text-slate-100 font-sans flex">
+
+<!-- Sidebar -->
+<div class="w-56 bg-slate-900 border-r border-slate-700 flex flex-col min-h-screen fixed left-0 top-0 z-20">
+  <div class="px-4 py-5 border-b border-slate-700">
+    <a href="/app/index.html" class="text-blue-400 font-bold text-lg tracking-tight">SubPaperz</a>
+  </div>
+  <nav class="flex-1 px-2 py-4 space-y-1">
+    <a href="/app/dashboard.html" class="flex items-center gap-2 px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 text-sm">📊 Dashboard</a>
+    <a href="/app/projects.html" class="flex items-center gap-2 px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 text-sm">📁 Projects</a>
+    <a href="/app/subs.html" class="flex items-center gap-2 px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 text-sm">👷 Subcontractors</a>
+    <a href="/app/documents.html" class="flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-900/40 text-blue-300 text-sm font-medium">📄 Documents</a>
+    <a href="/app/coi-tracker.html" class="flex items-center gap-2 px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 text-sm">🛡 COI Tracker</a>
+    <a href="/app/account.html" class="flex items-center gap-2 px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 text-sm">⚙️ Account</a>
+  </nav>
+  <div class="px-4 py-3 border-t border-slate-700">
+    <div id="planBadge" class="text-xs text-slate-500 mb-2">Free Plan</div>
+    <button onclick="signOut()" class="text-xs text-slate-500 hover:text-red-400">Sign out</button>
+  </div>
+</div>
+
+<!-- Main -->
+<div class="ml-56 flex-1 p-8">
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-white">Documents</h1>
+      <p class="text-slate-400 text-sm mt-1">All documents across your projects and subcontractors.</p>
+    </div>
+    <!-- New document dropdown -->
+    <div class="relative" id="newDocWrapper">
+      <button onclick="toggleNewDocMenu()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-1">+ New Document <span class="text-xs">▼</span></button>
+      <div id="newDocMenu" class="hidden absolute right-0 mt-1 w-52 bg-slate-800 border border-slate-700 rounded-xl shadow-xl z-10 overflow-hidden">
+        <a href="/forms/w9.html" class="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-300 hover:bg-slate-700 hover:text-white">📋 W-9</a>
+        <a href="/forms/lien-waiver.html?type=conditional_progress" class="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-300 hover:bg-slate-700 hover:text-white">📝 Lien Waiver — Conditional Progress</a>
+        <a href="/forms/lien-waiver.html?type=unconditional_progress" class="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-300 hover:bg-slate-700 hover:text-white">📝 Lien Waiver — Unconditional Progress</a>
+        <a href="/forms/lien-waiver.html?type=conditional_final" class="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-300 hover:bg-slate-700 hover:text-white">📝 Lien Waiver — Conditional Final</a>
+        <a href="/forms/lien-waiver.html?type=unconditional_final" class="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-300 hover:bg-slate-700 hover:text-white">📝 Lien Waiver — Unconditional Final</a>
+        <a href="/forms/sub-agreement.html" class="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-300 hover:bg-slate-700 hover:text-white">📃 Sub Agreement</a>
+        <a href="/forms/pay-application.html" class="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-300 hover:bg-slate-700 hover:text-white">💵 Pay Application</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="flex flex-wrap gap-3 mb-6">
+    <select id="filterType" onchange="applyFilters()" class="rounded-lg border px-3 py-2 text-sm">
+      <option value="">All Types</option>
+      <option value="w9">W-9</option>
+      <option value="lien_waiver_cond_prog">Lien Waiver — Cond. Progress</option>
+      <option value="lien_waiver_uncond_prog">Lien Waiver — Uncond. Progress</option>
+      <option value="lien_waiver_cond_final">Lien Waiver — Cond. Final</option>
+      <option value="lien_waiver_uncond_final">Lien Waiver — Uncond. Final</option>
+      <option value="sub_agreement">Sub Agreement</option>
+      <option value="pay_application">Pay Application</option>
+    </select>
+    <select id="filterStatus" onchange="applyFilters()" class="rounded-lg border px-3 py-2 text-sm">
+      <option value="">All Statuses</option>
+      <option value="signed">Signed</option>
+      <option value="pending_signature">Pending Signature</option>
+      <option value="draft">Draft</option>
+    </select>
+    <select id="filterSub" onchange="applyFilters()" class="rounded-lg border px-3 py-2 text-sm">
+      <option value="">All Subs</option>
+    </select>
+  </div>
+
+  <!-- Table -->
+  <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="bg-slate-700 text-slate-400 text-xs uppercase tracking-wider">
+            <th class="px-4 py-3 text-left">Document</th>
+            <th class="px-4 py-3 text-left">Subcontractor</th>
+            <th class="px-4 py-3 text-left">Type</th>
+            <th class="px-4 py-3 text-center">Status</th>
+            <th class="px-4 py-3 text-left">Date</th>
+            <th class="px-4 py-3 text-center">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="docsTableBody">
+          <tr><td colspan="6" class="px-4 py-16 text-center">
+            <div class="text-4xl mb-3">📄</div>
+            <p class="text-slate-400 font-medium">No documents yet</p>
+            <p class="text-slate-500 text-sm mt-1">Create your first document using the "New Document" button above.</p>
+          </td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/js/config.js"></script>
+<script src="/js/supabase-client.js"></script>
+<script src="/js/auth.js"></script>
+<script src="/js/documents.js"></script>
+<script>
+let allDocs = [];
+
+const DOC_LABELS = { w9:'W-9', lien_waiver_cond_prog:'Lien Waiver — Cond. Progress', lien_waiver_uncond_prog:'Lien Waiver — Uncond. Progress', lien_waiver_cond_final:'Lien Waiver — Cond. Final', lien_waiver_uncond_final:'Lien Waiver — Uncond. Final', sub_agreement:'Sub Agreement', pay_application:'Pay Application', coi:'COI' };
+const STATUS_COLORS = { signed:'bg-green-900/40 text-green-400 border-green-700', pending_signature:'bg-yellow-900/40 text-yellow-400 border-yellow-700', draft:'bg-slate-700 text-slate-400 border-slate-600', uploaded:'bg-blue-900/40 text-blue-400 border-blue-700' };
+const STATUS_LABELS = { signed:'Signed', pending_signature:'Pending', draft:'Draft', uploaded:'Uploaded' };
+
+async function init() {
+  await checkAuth();
+  await loadSubsDropdown();
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('sub')) document.getElementById('filterSub').value = params.get('sub');
+  await refresh();
+}
+
+async function loadSubsDropdown() {
+  const { data } = await db.from('subcontractors').select('id,company_name').order('company_name');
+  const sel = document.getElementById('filterSub');
+  (data||[]).forEach(s=>{ const o=document.createElement('option'); o.value=s.id; o.textContent=s.company_name; sel.appendChild(o); });
+}
+
+async function refresh() {
+  try {
+    const filters = { type:document.getElementById('filterType').value, status:document.getElementById('filterStatus').value, subId:document.getElementById('filterSub').value };
+    allDocs = await loadDocuments(filters);
+    renderTable();
+  } catch(e){ console.error(e); }
+}
+
+function applyFilters(){ refresh(); }
+
+function renderTable() {
+  const tbody = document.getElementById('docsTableBody');
+  if (!allDocs.length) { tbody.innerHTML=`<tr><td colspan="6" class="px-4 py-16 text-center"><div class="text-4xl mb-3">📄</div><p class="text-slate-400 font-medium">No documents found</p><p class="text-slate-500 text-sm mt-1">Try adjusting your filters or create a new document.</p></td></tr>`; return; }
+  tbody.innerHTML = allDocs.map(d => {
+    const subName = d.subcontractors?.company_name || '—';
+    const status = d.status || 'draft';
+    const sc = STATUS_COLORS[status] || STATUS_COLORS.draft;
+    const sl = STATUS_LABELS[status] || status;
+    const date = d.signed_at || d.created_at;
+    return `<tr class="border-t border-slate-700 hover:bg-slate-700/30 transition">
+      <td class="px-4 py-3 font-medium text-white">${DOC_LABELS[d.doc_type]||d.doc_type||'Document'}</td>
+      <td class="px-4 py-3 text-slate-300">${esc(subName)}</td>
+      <td class="px-4 py-3 text-slate-400 text-xs">${DOC_LABELS[d.doc_type]||'—'}</td>
+      <td class="px-4 py-3 text-center"><span class="inline-flex px-2 py-0.5 rounded-full border text-xs font-medium ${sc}">${sl}</span></td>
+      <td class="px-4 py-3 text-slate-400 text-xs">${date ? new Date(date).toLocaleDateString() : '—'}</td>
+      <td class="px-4 py-3 text-center">
+        <div class="flex items-center justify-center gap-2">
+          ${d.storage_path ? `<button onclick="viewDoc('${d.storage_path}')" class="text-blue-400 hover:text-blue-300 text-xs">View</button>` : ''}
+          ${status==='pending_signature' ? `<button onclick="copySignLink('${d.id}')" class="text-yellow-400 hover:text-yellow-300 text-xs">Copy Link</button>` : ''}
+          <button onclick="confirmDeleteDoc('${d.id}','${d.storage_path||''}')" class="text-red-400 hover:text-red-300 text-xs">Delete</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function toggleNewDocMenu() { document.getElementById('newDocMenu').classList.toggle('hidden'); }
+document.addEventListener('click', e => { if(!document.getElementById('newDocWrapper').contains(e.target)) document.getElementById('newDocMenu').classList.add('hidden'); });
+
+async function viewDoc(path) {
+  const { data } = await db.storage.from('documents').createSignedUrl(path, 3600);
+  if (data?.signedUrl) window.open(data.signedUrl,'_blank');
+  else alert('File not available.');
+}
+
+async function copySignLink(docId) {
+  try {
+    const { data } = await db.from('documents').select('sign_token').eq('id',docId).single();
+    if (data?.sign_token) {
+      const url = `${window.location.origin}/app/sign.html?token=${data.sign_token}`;
+      await navigator.clipboard.writeText(url);
+      alert('Signing link copied to clipboard!');
+    } else { alert('No active signing link. Regenerate from the sub\'s profile.'); }
+  } catch(e){ alert('Could not copy link.'); }
+}
+
+async function confirmDeleteDoc(id, path) {
+  if(!confirm('Delete this document? This cannot be undone.')) return;
+  try { await deleteDocument(id, path); await refresh(); } catch(e){ alert(e.message); }
+}
+
+function signOut(){ db.auth.signOut().then(()=>window.location.href='/index.html'); }
+init();
+</script>
+</body>
+</html>

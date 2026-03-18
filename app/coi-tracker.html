@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>COI Tracker — SubPaperz</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="manifest" href="/manifest.json"/>
+<style>
+body { background:#0f172a; }
+input,select { background:#1e293b!important; color:#f1f5f9!important; border-color:#334155!important; }
+input:focus,select:focus { border-color:#3b82f6!important; outline:none; }
+.modal-bg { background:rgba(0,0,0,0.7); backdrop-filter:blur(4px); }
+</style>
+</head>
+<body class="min-h-screen text-slate-100 font-sans flex">
+
+<!-- Sidebar -->
+<div id="sidebar" class="w-56 bg-slate-900 border-r border-slate-700 flex flex-col min-h-screen fixed left-0 top-0 z-20">
+  <div class="px-4 py-5 border-b border-slate-700">
+    <a href="/app/index.html" class="text-blue-400 font-bold text-lg tracking-tight">SubPaperz</a>
+  </div>
+  <nav class="flex-1 px-2 py-4 space-y-1">
+    <a href="/app/dashboard.html" class="flex items-center gap-2 px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 text-sm">📊 Dashboard</a>
+    <a href="/app/projects.html" class="flex items-center gap-2 px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 text-sm">📁 Projects</a>
+    <a href="/app/subs.html" class="flex items-center gap-2 px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 text-sm">👷 Subcontractors</a>
+    <a href="/app/documents.html" class="flex items-center gap-2 px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 text-sm">📄 Documents</a>
+    <a href="/app/coi-tracker.html" class="flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-900/40 text-blue-300 text-sm font-medium">🛡 COI Tracker</a>
+    <a href="/app/account.html" class="flex items-center gap-2 px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 text-sm">⚙️ Account</a>
+  </nav>
+  <div class="px-4 py-3 border-t border-slate-700">
+    <div id="planBadge" class="text-xs text-slate-500 mb-2">Free Plan</div>
+    <button onclick="signOut()" class="text-xs text-slate-500 hover:text-red-400">Sign out</button>
+  </div>
+</div>
+
+<!-- Main -->
+<div class="ml-56 flex-1 p-8">
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-white">COI Tracker</h1>
+      <p class="text-slate-400 text-sm mt-1">Track Certificate of Insurance expiry dates for all your subcontractors.</p>
+    </div>
+    <button onclick="openUploadModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold">+ Upload COI</button>
+  </div>
+
+  <!-- Stats -->
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+    <div class="bg-slate-800 rounded-xl border border-slate-700 p-4">
+      <div class="text-2xl font-bold text-white" id="statTotal">0</div>
+      <div class="text-xs text-slate-400 mt-1">Total COIs</div>
+    </div>
+    <div class="bg-green-900/30 rounded-xl border border-green-700 p-4">
+      <div class="text-2xl font-bold text-green-400" id="statActive">0</div>
+      <div class="text-xs text-slate-400 mt-1">Active</div>
+    </div>
+    <div class="bg-yellow-900/30 rounded-xl border border-yellow-700 p-4">
+      <div class="text-2xl font-bold text-yellow-400" id="statExpiring">0</div>
+      <div class="text-xs text-slate-400 mt-1">Expiring ≤30 days</div>
+    </div>
+    <div class="bg-red-900/30 rounded-xl border border-red-700 p-4">
+      <div class="text-2xl font-bold text-red-400" id="statExpired">0</div>
+      <div class="text-xs text-slate-400 mt-1">Expired</div>
+    </div>
+  </div>
+
+  <!-- OCR tip -->
+  <div class="bg-blue-900/20 border border-blue-800 rounded-lg px-4 py-3 mb-6 text-sm text-blue-300 flex items-center gap-3">
+    <span class="text-xl">🔍</span>
+    <span><strong>Coming soon:</strong> OCR auto-fill — upload a COI PDF and we'll automatically read the expiry date, insurer, and policy number. For now, enter the details manually below.</span>
+  </div>
+
+  <!-- COI Table -->
+  <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="bg-slate-700 text-slate-400 text-xs uppercase tracking-wider">
+            <th class="px-4 py-3 text-left">Subcontractor</th>
+            <th class="px-4 py-3 text-left">Insurer</th>
+            <th class="px-4 py-3 text-left">Policy #</th>
+            <th class="px-4 py-3 text-left">Effective</th>
+            <th class="px-4 py-3 text-left">Expires</th>
+            <th class="px-4 py-3 text-right">GL Limit</th>
+            <th class="px-4 py-3 text-right">WC Limit</th>
+            <th class="px-4 py-3 text-center">Status</th>
+            <th class="px-4 py-3 text-center">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="coiTableBody">
+          <tr id="emptyState">
+            <td colspan="9" class="px-4 py-16 text-center">
+              <div class="text-slate-500 text-sm">
+                <div class="text-4xl mb-3">🛡</div>
+                <p class="font-medium text-slate-400">No COIs tracked yet</p>
+                <p class="mt-1">Upload your first Certificate of Insurance to start tracking expiry dates.</p>
+                <button onclick="openUploadModal()" class="mt-4 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm">Upload COI</button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Upload COI Modal -->
+<div id="uploadModal" class="hidden fixed inset-0 modal-bg z-50 flex items-center justify-center p-4">
+  <div class="bg-slate-800 rounded-2xl border border-slate-700 w-full max-w-lg">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-slate-700">
+      <h2 class="font-semibold text-white">Upload Certificate of Insurance</h2>
+      <button onclick="closeUploadModal()" class="text-slate-400 hover:text-white text-xl">✕</button>
+    </div>
+    <div class="p-6 space-y-4">
+      <div>
+        <label class="block text-xs text-slate-400 mb-1">Subcontractor *</label>
+        <select id="coiSubId" class="w-full rounded-lg border px-3 py-2 text-sm">
+          <option value="">Select subcontractor...</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-xs text-slate-400 mb-1">COI File (PDF or image) *</label>
+        <input type="file" id="coiFile" accept=".pdf,image/*" class="w-full rounded-lg border px-3 py-2 text-sm"/>
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">Insurer Name *</label>
+          <input type="text" id="coiInsurer" placeholder="State Farm" class="w-full rounded-lg border px-3 py-2 text-sm"/>
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">Policy Number</label>
+          <input type="text" id="coiPolicyNum" placeholder="GL-12345678" class="w-full rounded-lg border px-3 py-2 text-sm"/>
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">Effective Date *</label>
+          <input type="date" id="coiEffective" class="w-full rounded-lg border px-3 py-2 text-sm"/>
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">Expiry Date *</label>
+          <input type="date" id="coiExpiry" class="w-full rounded-lg border px-3 py-2 text-sm"/>
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">GL Limit ($)</label>
+          <input type="number" id="coiGL" placeholder="1000000" class="w-full rounded-lg border px-3 py-2 text-sm"/>
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">WC Limit ($)</label>
+          <input type="number" id="coiWC" placeholder="Statutory" class="w-full rounded-lg border px-3 py-2 text-sm"/>
+        </div>
+      </div>
+      <div id="uploadError" class="hidden bg-red-900/40 border border-red-600 text-red-300 rounded-lg px-3 py-2 text-sm"></div>
+    </div>
+    <div class="px-6 py-4 border-t border-slate-700 flex gap-3 justify-end">
+      <button onclick="closeUploadModal()" class="px-4 py-2 text-slate-400 hover:text-white text-sm">Cancel</button>
+      <button onclick="submitCOI()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold">Upload & Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Reminder Modal -->
+<div id="reminderModal" class="hidden fixed inset-0 modal-bg z-50 flex items-center justify-center p-4">
+  <div class="bg-slate-800 rounded-2xl border border-slate-700 w-full max-w-md">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-slate-700">
+      <h2 class="font-semibold text-white">Send COI Renewal Reminder</h2>
+      <button onclick="document.getElementById('reminderModal').classList.add('hidden')" class="text-slate-400 hover:text-white">✕</button>
+    </div>
+    <div class="p-6">
+      <p class="text-slate-300 text-sm mb-4">An email reminder will be sent to the subcontractor's email on file.</p>
+      <div id="reminderInfo" class="bg-slate-700 rounded-lg p-3 text-sm text-slate-300 mb-4"></div>
+      <div id="reminderResult" class="hidden rounded-lg p-3 text-sm"></div>
+    </div>
+    <div class="px-6 py-4 border-t border-slate-700 flex gap-3 justify-end">
+      <button onclick="document.getElementById('reminderModal').classList.add('hidden')" class="px-4 py-2 text-slate-400 hover:text-white text-sm">Cancel</button>
+      <button id="sendReminderBtn" class="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg text-sm font-semibold">Send Reminder</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/js/config.js"></script>
+<script src="/js/supabase-client.js"></script>
+<script src="/js/auth.js"></script>
+<script src="/js/email.js"></script>
+<script src="/js/coi.js"></script>
+<script>
+let allCOIs = [];
+let selectedCoiId = null;
+
+async function init() {
+  await checkAuth();
+  await loadSubsForDropdown();
+  await refreshCOIs();
+}
+
+async function loadSubsForDropdown() {
+  try {
+    const { data } = await db.from('subcontractors').select('id, company_name').order('company_name');
+    const sel = document.getElementById('coiSubId');
+    (data||[]).forEach(s => {
+      const opt = document.createElement('option');
+      opt.value = s.id; opt.textContent = s.company_name;
+      sel.appendChild(opt);
+    });
+  } catch(e) { console.error(e); }
+}
+
+async function refreshCOIs() {
+  try {
+    allCOIs = await loadCOIs();
+    renderTable();
+    updateStats();
+  } catch(e) { console.error(e); }
+}
+
+function updateStats() {
+  let active=0, expiring=0, expired=0;
+  allCOIs.forEach(c => {
+    const s = getCOIStatus(c.expiry_date);
+    if (s.status==='active') active++;
+    else if (s.status==='expiring') expiring++;
+    else expired++;
+  });
+  document.getElementById('statTotal').textContent = allCOIs.length;
+  document.getElementById('statActive').textContent = active;
+  document.getElementById('statExpiring').textContent = expiring;
+  document.getElementById('statExpired').textContent = expired;
+}
+
+function renderTable() {
+  const tbody = document.getElementById('coiTableBody');
+  if (!allCOIs.length) { tbody.innerHTML = document.getElementById('emptyState').outerHTML; return; }
+  const statusColors = { active:'bg-green-900/40 text-green-400 border-green-700', expiring:'bg-yellow-900/40 text-yellow-400 border-yellow-700', expired:'bg-red-900/40 text-red-400 border-red-700' };
+  tbody.innerHTML = allCOIs.map(c => {
+    const s = getCOIStatus(c.expiry_date);
+    const subName = c.subcontractors?.company_name || '—';
+    const subEmail = c.subcontractors?.email || '';
+    const fmt = (n) => n ? '$'+parseFloat(n).toLocaleString() : '—';
+    const reminderBadge = c.reminder_30_sent
+      ? `<span class="ml-1 inline-flex px-1.5 py-0.5 rounded text-xs font-medium bg-green-900/40 text-green-400 border border-green-700">✓ Sent</span>`
+      : '';
+    return `<tr class="border-t border-slate-700 hover:bg-slate-700/30 transition">
+      <td class="px-4 py-3 font-medium">
+        <div>${subName}</div>
+        ${subEmail ? `<div class="text-xs text-slate-500 mt-0.5">${subEmail}</div>` : ''}
+      </td>
+      <td class="px-4 py-3 text-slate-300">${c.insurer_name||'—'}</td>
+      <td class="px-4 py-3 text-slate-400 text-xs font-mono">${c.policy_number||'—'}</td>
+      <td class="px-4 py-3 text-slate-300 text-sm">${c.effective_date||'—'}</td>
+      <td class="px-4 py-3 text-sm font-medium ${s.status==='expired'?'text-red-400':s.status==='expiring'?'text-yellow-400':'text-slate-300'}">${c.expiry_date}</td>
+      <td class="px-4 py-3 text-right text-slate-300 text-sm">${fmt(c.gl_limit)}</td>
+      <td class="px-4 py-3 text-right text-slate-300 text-sm">${fmt(c.wc_limit)}</td>
+      <td class="px-4 py-3 text-center">
+        <span class="inline-flex px-2 py-0.5 rounded-full border text-xs font-medium ${statusColors[s.status]}">${s.label}</span>
+        ${reminderBadge}
+      </td>
+      <td class="px-4 py-3 text-center">
+        <div class="flex items-center justify-center gap-2">
+          <button onclick="viewCOI('${c.storage_path}')" class="text-blue-400 hover:text-blue-300 text-xs">View</button>
+          <button onclick="openReminderModal('${c.id}')" class="text-yellow-400 hover:text-yellow-300 text-xs">${c.reminder_30_sent ? 'Re-send' : 'Remind'}</button>
+          <button onclick="confirmDelete('${c.id}','${c.storage_path}')" class="text-red-400 hover:text-red-300 text-xs">Delete</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+async function viewCOI(path) {
+  try {
+    const url = await getCOIUrl(path);
+    if (url) window.open(url, '_blank');
+  } catch(e) { alert('Could not retrieve file.'); }
+}
+
+function openUploadModal() { document.getElementById('uploadModal').classList.remove('hidden'); }
+function closeUploadModal() { document.getElementById('uploadModal').classList.add('hidden'); document.getElementById('uploadError').classList.add('hidden'); }
+
+async function submitCOI() {
+  const subId = document.getElementById('coiSubId').value;
+  const file = document.getElementById('coiFile').files[0];
+  const insurer = document.getElementById('coiInsurer').value;
+  const expiry = document.getElementById('coiExpiry').value;
+  const errEl = document.getElementById('uploadError');
+  if (!subId||!file||!insurer||!expiry) { errEl.textContent='Please fill in all required fields.'; errEl.classList.remove('hidden'); return; }
+  try {
+    errEl.classList.add('hidden');
+    await uploadCOI(subId, file, {
+      insurerName: insurer,
+      policyNumber: document.getElementById('coiPolicyNum').value,
+      effectiveDate: document.getElementById('coiEffective').value,
+      expiryDate: expiry,
+      glLimit: document.getElementById('coiGL').value,
+      wcLimit: document.getElementById('coiWC').value,
+    });
+    closeUploadModal();
+    await refreshCOIs();
+  } catch(e) { errEl.textContent = e.message; errEl.classList.remove('hidden'); }
+}
+
+function openReminderModal(coiId) {
+  selectedCoiId = coiId;
+  const coi = allCOIs.find(c => c.id === coiId);
+  if (!coi) return;
+  document.getElementById('reminderInfo').textContent = `To: ${coi.subcontractors?.company_name||'Sub'} — COI expiring ${coi.expiry_date}`;
+  document.getElementById('reminderResult').classList.add('hidden');
+  document.getElementById('reminderModal').classList.remove('hidden');
+  document.getElementById('sendReminderBtn').onclick = async () => {
+    try {
+      const res = await sendRenewalReminder(coiId);
+      const el = document.getElementById('reminderResult');
+      el.classList.remove('hidden');
+      if (res.success) { el.className='rounded-lg p-3 text-sm bg-green-900/40 border border-green-600 text-green-300'; el.textContent='✓ Reminder sent successfully.'; }
+      else { el.className='rounded-lg p-3 text-sm bg-red-900/40 border border-red-600 text-red-300'; el.textContent='Error: '+res.error; }
+    } catch(e) { console.error(e); }
+  };
+}
+
+async function confirmDelete(coiId, path) {
+  if (!confirm('Delete this COI record? This cannot be undone.')) return;
+  try { await deleteCOI(coiId, path); await refreshCOIs(); } catch(e) { alert('Delete failed: '+e.message); }
+}
+
+function signOut() { if(typeof db !== 'undefined') db.auth.signOut().then(() => window.location.href='/index.html'); }
+
+init();
+</script>
+</body>
+</html>

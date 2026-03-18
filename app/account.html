@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Account — SubPaperz</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="manifest" href="/manifest.json"/>
+<style>
+body{background:#0f172a;}
+input,select{background:#1e293b!important;color:#f1f5f9!important;border-color:#334155!important;}
+input:focus{border-color:#3b82f6!important;outline:none;box-shadow:0 0 0 2px rgba(59,130,246,0.3);}
+.modal-bg{background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);}
+</style>
+</head>
+<body class="min-h-screen text-slate-100 font-sans flex">
+
+<!-- Sidebar -->
+<div class="w-56 bg-slate-900 border-r border-slate-700 flex flex-col min-h-screen fixed left-0 top-0 z-20">
+  <div class="px-4 py-5 border-b border-slate-700">
+    <a href="/app/index.html" class="text-blue-400 font-bold text-lg tracking-tight">SubPaperz</a>
+  </div>
+  <nav class="flex-1 px-2 py-4 space-y-1">
+    <a href="/app/dashboard.html" class="flex items-center gap-2 px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 text-sm">📊 Dashboard</a>
+    <a href="/app/projects.html" class="flex items-center gap-2 px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 text-sm">📁 Projects</a>
+    <a href="/app/subs.html" class="flex items-center gap-2 px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 text-sm">👷 Subcontractors</a>
+    <a href="/app/documents.html" class="flex items-center gap-2 px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 text-sm">📄 Documents</a>
+    <a href="/app/coi-tracker.html" class="flex items-center gap-2 px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 text-sm">🛡 COI Tracker</a>
+    <a href="/app/account.html" class="flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-900/40 text-blue-300 text-sm font-medium">⚙️ Account</a>
+  </nav>
+  <div class="px-4 py-3 border-t border-slate-700">
+    <div id="sidebarPlanBadge" class="text-xs text-slate-500 mb-2">Free Plan</div>
+    <button onclick="signOut()" class="text-xs text-slate-500 hover:text-red-400">Sign out</button>
+  </div>
+</div>
+
+<!-- Main -->
+<div class="ml-56 flex-1 p-8 max-w-3xl">
+  <h1 class="text-2xl font-bold text-white mb-8">Account Settings</h1>
+
+  <!-- Profile -->
+  <div class="bg-slate-800 rounded-xl border border-slate-700 p-6 mb-6">
+    <h2 class="text-lg font-semibold text-white mb-4">Profile</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+        <label class="block text-xs text-slate-400 mb-1">Full Name</label>
+        <input type="text" id="profileName" placeholder="Jane Smith" class="w-full rounded-lg border px-3 py-2 text-sm"/>
+      </div>
+      <div>
+        <label class="block text-xs text-slate-400 mb-1">Company Name</label>
+        <input type="text" id="profileCompany" placeholder="Smith Construction LLC" class="w-full rounded-lg border px-3 py-2 text-sm"/>
+      </div>
+      <div>
+        <label class="block text-xs text-slate-400 mb-1">Email</label>
+        <input type="email" id="profileEmail" disabled class="w-full rounded-lg border px-3 py-2 text-sm opacity-60 cursor-not-allowed"/>
+      </div>
+      <div>
+        <label class="block text-xs text-slate-400 mb-1">Phone</label>
+        <input type="tel" id="profilePhone" placeholder="(208) 555-0100" class="w-full rounded-lg border px-3 py-2 text-sm"/>
+      </div>
+    </div>
+    <div id="profileMsg" class="hidden mt-3 rounded-lg px-3 py-2 text-sm"></div>
+    <button onclick="saveProfile()" class="mt-4 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg text-sm font-semibold">Save Profile</button>
+  </div>
+
+  <!-- Current Plan -->
+  <div class="bg-slate-800 rounded-xl border border-slate-700 p-6 mb-6">
+    <h2 class="text-lg font-semibold text-white mb-4">Plan & Billing</h2>
+    <div id="planSection">
+      <!-- Rendered by JS -->
+    </div>
+  </div>
+
+  <!-- States Covered -->
+  <div class="bg-slate-800 rounded-xl border border-slate-700 p-6 mb-6">
+    <h2 class="text-lg font-semibold text-white mb-2">Coverage</h2>
+    <p class="text-slate-400 text-sm mb-3">SubPaperz currently supports these contractor-friendly states:</p>
+    <div class="flex flex-wrap gap-2">
+      <span class="bg-blue-900/40 border border-blue-700 text-blue-300 text-xs px-3 py-1 rounded-full">🏔 Idaho (HQ)</span>
+      <span class="bg-slate-700 text-slate-300 text-xs px-3 py-1 rounded-full">South Dakota</span>
+      <span class="bg-slate-700 text-slate-300 text-xs px-3 py-1 rounded-full">Nebraska</span>
+      <span class="bg-slate-700 text-slate-300 text-xs px-3 py-1 rounded-full">Kansas</span>
+      <span class="bg-slate-700 text-slate-300 text-xs px-3 py-1 rounded-full">Colorado</span>
+      <span class="bg-slate-700 text-slate-300 text-xs px-3 py-1 rounded-full">Montana</span>
+      <span class="bg-slate-700 text-slate-300 text-xs px-3 py-1 rounded-full">Oklahoma</span>
+      <span class="bg-slate-700 text-slate-300 text-xs px-3 py-1 rounded-full">New Hampshire</span>
+      <span class="bg-slate-700 text-slate-300 text-xs px-3 py-1 rounded-full">North Dakota</span>
+    </div>
+    <p class="text-slate-500 text-xs mt-3">More states coming. <a href="/#states" class="text-blue-400 underline">Join the waitlist</a> for your state.</p>
+  </div>
+
+  <!-- Danger Zone -->
+  <div class="bg-red-950/30 rounded-xl border border-red-800 p-6">
+    <h2 class="text-lg font-semibold text-red-400 mb-2">Danger Zone</h2>
+    <p class="text-slate-400 text-sm mb-4">Permanently delete your account and all associated data. This action cannot be undone.</p>
+    <button onclick="confirmDeleteAccount()" class="bg-red-700 hover:bg-red-600 text-white px-5 py-2 rounded-lg text-sm font-semibold">Delete Account</button>
+  </div>
+</div>
+
+<!-- Delete confirmation modal -->
+<div id="deleteModal" class="hidden fixed inset-0 modal-bg z-50 flex items-center justify-center p-4">
+  <div class="bg-slate-800 rounded-2xl border border-red-800 w-full max-w-md p-6">
+    <h2 class="text-lg font-bold text-red-400 mb-3">Delete Account?</h2>
+    <p class="text-slate-300 text-sm mb-4">This will permanently delete your account, all projects, subcontractors, and documents. <strong>This cannot be undone.</strong></p>
+    <p class="text-slate-400 text-sm mb-4">Type <code class="bg-slate-700 px-1 rounded">DELETE</code> to confirm:</p>
+    <input type="text" id="deleteConfirmInput" placeholder="DELETE" class="w-full rounded-lg border border-red-700 bg-slate-900 text-white px-3 py-2 text-sm mb-4"/>
+    <div class="flex gap-3 justify-end">
+      <button onclick="document.getElementById('deleteModal').classList.add('hidden')" class="px-4 py-2 text-slate-400 hover:text-white text-sm">Cancel</button>
+      <button onclick="doDeleteAccount()" class="bg-red-700 hover:bg-red-600 text-white px-5 py-2 rounded-lg text-sm font-semibold">Delete Forever</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/js/config.js"></script>
+<script src="/js/supabase-client.js"></script>
+<script src="/js/auth.js"></script>
+<script>
+let currentPlan = 'free';
+
+const PLAN_CONFIG = {
+  free: {
+    label: 'Free', color: 'text-slate-300',
+    features: ['Fill & download all forms','3 saved documents','1 user','No e-sign or COI tracking'],
+    upgrade: { label:'Upgrade to Pro — $49/mo', key:'STRIPE_PRO_LINK', color:'bg-blue-600 hover:bg-blue-700' }
+  },
+  pro: {
+    label: 'Pro', color: 'text-blue-400',
+    features: ['Unlimited documents','Remote e-sign (send to subs)','COI tracking + expiry alerts','Email reminders','1 user'],
+    upgrade: { label:'Upgrade to Team — $99/mo', key:'STRIPE_TEAM_LINK', color:'bg-purple-600 hover:bg-purple-700' }
+  },
+  team: {
+    label: 'Team', color: 'text-purple-400',
+    features: ['Everything in Pro','Up to 5 team seats','Priority support'],
+    upgrade: null
+  }
+};
+
+async function init() {
+  await checkAuth();
+  const { data: { user } } = await db.auth.getUser();
+  if (!user) return;
+  document.getElementById('profileEmail').value = user.email || '';
+  const { data: profile } = await db.from('profiles').select('*').eq('id', user.id).single();
+  if (profile) {
+    document.getElementById('profileName').value = profile.full_name || '';
+    document.getElementById('profileCompany').value = profile.company_name || '';
+    document.getElementById('profilePhone').value = profile.phone || '';
+    currentPlan = profile.plan || 'free';
+  }
+  renderPlanSection();
+  const badge = document.getElementById('sidebarPlanBadge');
+  badge.textContent = currentPlan.charAt(0).toUpperCase()+currentPlan.slice(1)+' Plan';
+}
+
+function renderPlanSection() {
+  const cfg = PLAN_CONFIG[currentPlan] || PLAN_CONFIG.free;
+  const stripeLink = typeof STRIPE_PRO_LINK !== 'undefined' ? (currentPlan==='free' ? STRIPE_PRO_LINK : STRIPE_TEAM_LINK) : '#';
+  document.getElementById('planSection').innerHTML = `
+    <div class="flex items-center gap-3 mb-4">
+      <span class="text-2xl font-bold ${cfg.color}">${cfg.label}</span>
+      <span class="text-slate-500 text-sm">Plan</span>
+    </div>
+    <ul class="space-y-2 mb-5">
+      ${cfg.features.map(f=>`<li class="flex items-center gap-2 text-sm text-slate-300"><span class="text-green-400">✓</span>${f}</li>`).join('')}
+    </ul>
+    ${cfg.upgrade ? `<a href="${stripeLink}" target="_blank" class="inline-block ${cfg.upgrade.color} text-white px-5 py-2 rounded-lg text-sm font-semibold">${cfg.upgrade.label}</a>
+    <p class="text-slate-500 text-xs mt-2">After payment, contact <a href="mailto:hello@subpaperz.com" class="text-blue-400 underline">hello@subpaperz.com</a> to activate your plan, or it will be activated automatically within 1 hour.</p>` : '<p class="text-green-400 text-sm font-medium">✓ You\'re on the highest plan. Thank you!</p>'}
+  `;
+}
+
+async function saveProfile() {
+  const { data: { user } } = await db.auth.getUser();
+  if (!user) return;
+  const msg = document.getElementById('profileMsg');
+  try {
+    const { error } = await db.from('profiles').upsert({
+      id: user.id,
+      full_name: document.getElementById('profileName').value,
+      company_name: document.getElementById('profileCompany').value,
+      phone: document.getElementById('profilePhone').value,
+      updated_at: new Date().toISOString(),
+    });
+    if (error) throw error;
+    msg.className = 'mt-3 rounded-lg px-3 py-2 text-sm bg-green-900/40 border border-green-600 text-green-300';
+    msg.textContent = '✓ Profile saved.';
+    msg.classList.remove('hidden');
+    setTimeout(()=>msg.classList.add('hidden'), 3000);
+  } catch(e) {
+    msg.className = 'mt-3 rounded-lg px-3 py-2 text-sm bg-red-900/40 border border-red-600 text-red-300';
+    msg.textContent = 'Error: '+e.message;
+    msg.classList.remove('hidden');
+  }
+}
+
+function confirmDeleteAccount() { document.getElementById('deleteConfirmInput').value=''; document.getElementById('deleteModal').classList.remove('hidden'); }
+
+async function doDeleteAccount() {
+  if (document.getElementById('deleteConfirmInput').value !== 'DELETE') { alert('Please type DELETE to confirm.'); return; }
+  try {
+    const { data: { user } } = await db.auth.getUser();
+    if (!user) return;
+    // Delete user data (Supabase cascade should handle related records if FK cascade is set)
+    await db.from('profiles').delete().eq('id', user.id);
+    await db.auth.signOut();
+    window.location.href = '/index.html';
+  } catch(e) { alert('Error deleting account: '+e.message); }
+}
+
+function signOut(){ db.auth.signOut().then(()=>window.location.href='/index.html'); }
+init();
+</script>
+</body>
+</html>

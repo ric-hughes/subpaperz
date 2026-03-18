@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Sign Document — SubPaperz</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
+<style>
+  body { background:#0f172a; }
+  .sig-canvas { border: 2px dashed #94a3b8; background: white; cursor: crosshair; width: 100%; height: 180px; border-radius: 12px; touch-action: none; }
+</style>
+</head>
+<body class="min-h-screen text-slate-100 font-sans">
+
+<!-- Header -->
+<nav class="bg-slate-900 border-b border-slate-700 px-6 py-4 flex items-center justify-between">
+  <span class="text-blue-400 font-bold text-lg tracking-tight">SubPaperz</span>
+  <span class="text-slate-500 text-xs">Secure Document Signing</span>
+</nav>
+
+<div class="max-w-lg mx-auto px-4 py-8" id="mainContent">
+
+  <!-- Loading -->
+  <div id="loadingState" class="text-center py-16">
+    <div class="text-4xl mb-4">⏳</div>
+    <p class="text-slate-400">Loading document...</p>
+  </div>
+
+  <!-- Error -->
+  <div id="errorState" class="hidden text-center py-16">
+    <div class="text-5xl mb-4">🔒</div>
+    <h2 class="text-xl font-bold text-white mb-2">Link Invalid or Expired</h2>
+    <p class="text-slate-400 text-sm mb-6" id="errorMsg">This signing link is invalid or has already been used.</p>
+    <p class="text-slate-500 text-sm">Please contact your contractor for a new signing link.</p>
+  </div>
+
+  <!-- Success -->
+  <div id="successState" class="hidden text-center py-16">
+    <div class="text-5xl mb-4">✅</div>
+    <h2 class="text-xl font-bold text-white mb-2">Document Signed</h2>
+    <p class="text-slate-400 text-sm">Your signature has been recorded and the signed document has been saved. You may close this window.</p>
+    <p class="text-slate-500 text-sm mt-4">A copy has been securely stored with your contractor.</p>
+  </div>
+
+  <!-- Signing UI -->
+  <div id="signingState" class="hidden">
+    <div class="text-center mb-6">
+      <div class="text-4xl mb-3">📄</div>
+      <h1 class="text-xl font-bold text-white mb-1" id="docTitle">Document for Signature</h1>
+      <p class="text-slate-400 text-sm">Review the document details below, then sign at the bottom.</p>
+    </div>
+
+    <!-- Document Summary -->
+    <div class="bg-slate-800 rounded-2xl border border-slate-700 p-6 mb-6">
+      <h2 class="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-4">Document Details</h2>
+      <div id="docFields" class="space-y-3 text-sm"></div>
+    </div>
+
+    <!-- Legal Language -->
+    <div class="bg-slate-800 rounded-2xl border border-slate-700 p-6 mb-6">
+      <h2 class="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-3">Release Language</h2>
+      <div id="legalText" class="text-xs text-slate-400 leading-relaxed bg-slate-900 rounded-lg p-4 max-h-40 overflow-y-auto font-mono whitespace-pre-wrap"></div>
+    </div>
+
+    <!-- Signature -->
+    <div class="bg-slate-800 rounded-2xl border border-slate-700 p-6 mb-6">
+      <h2 class="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-3">Your Signature *</h2>
+      <p class="text-slate-400 text-xs mb-3">Draw your signature in the box below using your finger or stylus.</p>
+      <canvas id="sigPad" class="sig-canvas"></canvas>
+      <button type="button" onclick="padInstance && padInstance.clear()" class="mt-2 text-xs text-slate-400 hover:text-white underline">Clear Signature</button>
+      <div class="mt-4">
+        <label class="block text-xs text-slate-400 mb-1">Printed Name *</label>
+        <input type="text" id="printedName" placeholder="Your full name" class="w-full rounded-lg border border-slate-600 bg-slate-700 text-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"/>
+      </div>
+    </div>
+
+    <!-- Confirmation -->
+    <div class="bg-yellow-900/20 border border-yellow-700 rounded-xl p-4 mb-6 text-sm text-yellow-200">
+      <strong>By signing, you confirm:</strong> You have read and understood this document. Your signature is legally binding in Idaho and 8 Tier 1 states. E-signatures are valid under applicable state law.
+    </div>
+
+    <div id="signError" class="hidden bg-red-900/40 border border-red-600 text-red-300 rounded-lg px-4 py-3 text-sm mb-4"></div>
+
+    <button onclick="submitSignature()" id="signBtn" class="w-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white py-4 rounded-xl font-bold text-base shadow-lg mb-4">
+      Sign Document
+    </button>
+
+    <p class="text-center text-slate-500 text-xs">
+      <a href="#" onclick="alert('Please contact the contractor who sent this document for assistance.')" class="underline hover:text-slate-400">Need help?</a>
+      &nbsp;·&nbsp;
+      Powered by <a href="https://subpaperz.com" class="underline hover:text-slate-400">SubPaperz</a>
+    </p>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/js/config.js"></script>
+<script src="/js/supabase-client.js"></script>
+<script src="/js/pdf-lien-waiver.js"></script>
+<script src="/js/pdf-w9.js"></script>
+<script src="/js/esign.js"></script>
+<script>
+let padInstance = null;
+let docRecord = null;
+
+const DOC_TYPE_LABELS = {
+  w9: 'W-9 Request for Taxpayer Identification',
+  lien_waiver_cond_prog: 'Conditional Lien Waiver — Progress Payment',
+  lien_waiver_uncond_prog: 'Unconditional Lien Waiver — Progress Payment',
+  lien_waiver_cond_final: 'Conditional Lien Waiver — Final Payment',
+  lien_waiver_uncond_final: 'Unconditional Lien Waiver — Final Payment',
+  sub_agreement: 'Subcontractor Agreement',
+  pay_application: 'Pay Application',
+};
+
+function show(id) { ['loadingState','errorState','successState','signingState'].forEach(s => document.getElementById(s).classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); }
+function showError(msg) { document.getElementById('errorMsg').textContent = msg; show('errorState'); }
+
+async function loadDocument() {
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get('token');
+  if (!token) { showError('No signing token found in this URL.'); return; }
+
+  try {
+    const { data, error } = await db.from('documents')
+      .select('id, doc_type, form_data, created_at, status, sign_token_expires_at')
+      .eq('sign_token', token)
+      .eq('status', 'pending_signature')
+      .gte('sign_token_expires_at', new Date().toISOString())
+      .single();
+
+    if (error || !data) { showError('This signing link has expired, already been used, or is invalid. Please request a new link from your contractor.'); return; }
+
+    docRecord = data;
+    renderSigningUI(data);
+  } catch(e) {
+    showError('An error occurred loading this document. Please try again.');
+  }
+}
+
+function renderSigningUI(doc) {
+  const label = DOC_TYPE_LABELS[doc.doc_type] || doc.doc_type;
+  document.getElementById('docTitle').textContent = label;
+  show('signingState');
+
+  // Render form fields
+  const fd = doc.form_data || {};
+  const fields = document.getElementById('docFields');
+  const fieldMap = {
+    claimantName: 'Claimant', gcName: 'General Contractor', ownerName: 'Owner',
+    propertyDescription: 'Property', throughDate: 'Through Date', amount: 'Payment Amount',
+    projectName: 'Project', subName: 'Subcontractor', name: 'Name', businessName: 'Business Name',
+  };
+  fields.innerHTML = Object.entries(fieldMap).filter(([k]) => fd[k]).map(([k,label]) =>
+    `<div class="flex justify-between gap-4"><span class="text-slate-500 flex-shrink-0">${label}</span><span class="text-slate-200 text-right">${fd[k]}</span></div>`
+  ).join('') || '<p class="text-slate-500">Document fields not available for preview.</p>';
+
+  // Legal text
+  if (doc.doc_type && doc.doc_type.includes('lien') && window.LIEN_LANG) {
+    const typeMap = { lien_waiver_cond_prog:'conditional_progress', lien_waiver_uncond_prog:'unconditional_progress', lien_waiver_cond_final:'conditional_final', lien_waiver_uncond_final:'unconditional_final' };
+    const lienType = typeMap[doc.doc_type];
+    const langFn = window.LIEN_LANG[lienType];
+    if (langFn) document.getElementById('legalText').textContent = langFn(fd);
+  } else {
+    document.getElementById('legalText').textContent = 'Review the document details above before signing.';
+  }
+
+  // Init signature pad
+  padInstance = new ESignature('sigPad', { label:'Signature', required:true });
+  padInstance.init();
+}
+
+async function submitSignature() {
+  const btn = document.getElementById('signBtn');
+  const errEl = document.getElementById('signError');
+  errEl.classList.add('hidden');
+
+  if (!padInstance || padInstance.isEmpty()) {
+    errEl.textContent = 'Please draw your signature before submitting.';
+    errEl.classList.remove('hidden'); return;
+  }
+  const name = document.getElementById('printedName').value.trim();
+  if (!name) {
+    errEl.textContent = 'Please enter your printed name.';
+    errEl.classList.remove('hidden'); return;
+  }
+
+  btn.disabled = true; btn.textContent = 'Signing...';
+
+  try {
+    const sigDataURL = padInstance.getDataURL();
+    const fd = docRecord.form_data || {};
+    let pdfBlob = null;
+
+    // Generate PDF
+    if (docRecord.doc_type && docRecord.doc_type.includes('lien') && window.generateLienWaiverPDF) {
+      const typeMap = { lien_waiver_cond_prog:'conditional_progress', lien_waiver_uncond_prog:'unconditional_progress', lien_waiver_cond_final:'conditional_final', lien_waiver_uncond_final:'unconditional_final' };
+      fd.type = typeMap[docRecord.doc_type] || 'conditional_progress';
+      const doc = window.generateLienWaiverPDF(fd, sigDataURL);
+      pdfBlob = doc.output('blob');
+    } else if (docRecord.doc_type === 'w9' && window.generateW9PDF) {
+      const doc = window.generateW9PDF(fd, sigDataURL);
+      pdfBlob = doc.output('blob');
+    }
+
+    // Upload signed PDF
+    if (pdfBlob) {
+      const path = `signed/${docRecord.id}/signed_${Date.now()}.pdf`;
+      await db.storage.from('documents').upload(path, pdfBlob, { contentType:'application/pdf' });
+      await db.from('documents').update({ status:'signed', signed_at:new Date().toISOString(), sign_token:null, sign_token_expires_at:null, storage_path:path }).eq('id', docRecord.id);
+    } else {
+      await db.from('documents').update({ status:'signed', signed_at:new Date().toISOString(), sign_token:null, sign_token_expires_at:null }).eq('id', docRecord.id);
+    }
+
+    show('successState');
+  } catch(e) {
+    errEl.textContent = 'An error occurred: ' + e.message + '. Please try again or contact your contractor.';
+    errEl.classList.remove('hidden');
+    btn.disabled = false; btn.textContent = 'Sign Document';
+  }
+}
+
+loadDocument();
+</script>
+</body>
+</html>

@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Pay Application — SubPaperz</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
+<link rel="manifest" href="/manifest.json"/>
+<style>
+  body { background: #0f172a; }
+  .sig-canvas { border: 2px dashed #94a3b8; background: white; cursor: crosshair; width: 100%; height: 140px; border-radius: 8px; }
+  input, select, textarea { background: #1e293b !important; color: #f1f5f9 !important; border-color: #334155 !important; }
+  input:focus, select:focus, textarea:focus { border-color: #3b82f6 !important; outline: none; box-shadow: 0 0 0 2px rgba(59,130,246,0.3); }
+</style>
+</head>
+<body class="min-h-screen text-slate-100 font-sans">
+
+<!-- Nav -->
+<nav class="bg-slate-900 border-b border-slate-700 px-6 py-3 flex items-center justify-between sticky top-0 z-10">
+  <a href="/app/index.html" class="text-blue-400 font-bold text-lg tracking-tight">SubPaperz</a>
+  <span class="text-slate-400 text-sm">Pay Application</span>
+  <a href="/app/dashboard.html" class="text-slate-400 hover:text-white text-sm">← Dashboard</a>
+</nav>
+
+<div class="max-w-5xl mx-auto px-4 py-8">
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold text-white">Application for Payment</h1>
+    <p class="text-slate-400 text-sm mt-1">AIA G702-style pay application. Fill out all sections, add line items, then download your PDF.</p>
+  </div>
+
+  <!-- What is a Pay App explainer -->
+  <div class="bg-blue-900/30 border border-blue-700 rounded-lg p-4 mb-6">
+    <button onclick="this.nextElementSibling.classList.toggle('hidden')" class="w-full text-left flex items-center justify-between text-blue-300 font-medium text-sm">
+      <span>💡 What is a Pay Application?</span><span>▼</span>
+    </button>
+    <div class="mt-3 text-slate-300 text-sm space-y-1">
+      <p>A Pay Application is a formal request for payment from a subcontractor to the General Contractor. It shows exactly how much work has been completed and calculates how much money is currently owed.</p>
+      <p class="mt-2"><strong class="text-white">How it works:</strong> You list every scope item with its value, then report what percent is done. The form calculates your current payment automatically, minus any retainage the GC is holding back.</p>
+      <p class="mt-2 text-yellow-300">⚡ Tip: Submit your pay app alongside a Conditional Lien Waiver to speed up payment. GCs often require both before releasing a check.</p>
+    </div>
+  </div>
+
+  <form id="payAppForm" class="space-y-6">
+
+    <!-- Header Info -->
+    <div class="bg-slate-800 rounded-xl border border-slate-700 p-6">
+      <h2 class="text-lg font-semibold text-white mb-4">Application Details</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">Application #</label>
+          <input type="number" id="appNumber" value="1" class="w-full rounded-lg border px-3 py-2 text-sm"/>
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">Application Date</label>
+          <input type="date" id="appDate" class="w-full rounded-lg border px-3 py-2 text-sm"/>
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">Period From</label>
+          <input type="date" id="periodFrom" class="w-full rounded-lg border px-3 py-2 text-sm"/>
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">Period To</label>
+          <input type="date" id="periodTo" class="w-full rounded-lg border px-3 py-2 text-sm"/>
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">Original Contract Amount ($)</label>
+          <input type="number" id="originalContract" placeholder="0.00" class="w-full rounded-lg border px-3 py-2 text-sm" oninput="recalc()"/>
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">Net Change Orders ($)</label>
+          <input type="number" id="changeOrders" placeholder="0.00" value="0" class="w-full rounded-lg border px-3 py-2 text-sm" oninput="recalc()"/>
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">Retainage %</label>
+          <input type="number" id="retainage" value="10" min="0" max="100" class="w-full rounded-lg border px-3 py-2 text-sm" oninput="recalc()"/>
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">Previous Certificates ($)</label>
+          <input type="number" id="previousCertificates" placeholder="0.00" value="0" class="w-full rounded-lg border px-3 py-2 text-sm" oninput="recalc()"/>
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">Contract Date</label>
+          <input type="date" id="contractDate" class="w-full rounded-lg border px-3 py-2 text-sm"/>
+        </div>
+      </div>
+    </div>
+
+    <!-- Project & Parties -->
+    <div class="bg-slate-800 rounded-xl border border-slate-700 p-6">
+      <h2 class="text-lg font-semibold text-white mb-4">Project & Parties</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">Project Name</label>
+          <input type="text" id="projectName" placeholder="Main Street Office Renovation" class="w-full rounded-lg border px-3 py-2 text-sm"/>
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">Project Address</label>
+          <input type="text" id="projectAddress" placeholder="123 Main St, Boise, ID 83702" class="w-full rounded-lg border px-3 py-2 text-sm"/>
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">Owner Name</label>
+          <input type="text" id="ownerName" placeholder="Property Owner LLC" class="w-full rounded-lg border px-3 py-2 text-sm"/>
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">Subcontractor (Your Company)</label>
+          <input type="text" id="subName" placeholder="Your Company Name" class="w-full rounded-lg border px-3 py-2 text-sm"/>
+        </div>
+      </div>
+    </div>
+
+    <!-- Schedule of Values -->
+    <div class="bg-slate-800 rounded-xl border border-slate-700 p-6">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h2 class="text-lg font-semibold text-white">Schedule of Values</h2>
+          <p class="text-slate-400 text-xs mt-0.5">List every line item in your scope. Enter what was done previously, what's done this period, and any stored materials.</p>
+        </div>
+        <button type="button" onclick="addRow()" class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 rounded-lg font-medium">+ Add Line Item</button>
+      </div>
+
+      <!-- Table -->
+      <div class="overflow-x-auto">
+        <table class="w-full text-xs" id="sovTable">
+          <thead>
+            <tr class="bg-slate-700 text-slate-300">
+              <th class="px-2 py-2 text-left w-8">#</th>
+              <th class="px-2 py-2 text-left">Description of Work</th>
+              <th class="px-2 py-2 text-right">Scheduled Value</th>
+              <th class="px-2 py-2 text-right">Prev. Completed</th>
+              <th class="px-2 py-2 text-right">This Period</th>
+              <th class="px-2 py-2 text-right">Stored</th>
+              <th class="px-2 py-2 text-right bg-blue-900/40">Total Done</th>
+              <th class="px-2 py-2 text-right">%</th>
+              <th class="px-2 py-2 text-right">Balance</th>
+              <th class="px-2 py-2 w-8"></th>
+            </tr>
+          </thead>
+          <tbody id="sovBody"></tbody>
+          <tfoot id="sovFoot" class="bg-slate-700 font-bold text-slate-200">
+            <tr>
+              <td class="px-2 py-2" colspan="2">TOTALS</td>
+              <td class="px-2 py-2 text-right" id="totSched">$0.00</td>
+              <td class="px-2 py-2 text-right" id="totPrev">$0.00</td>
+              <td class="px-2 py-2 text-right" id="totThis">$0.00</td>
+              <td class="px-2 py-2 text-right" id="totStored">$0.00</td>
+              <td class="px-2 py-2 text-right bg-blue-900/40" id="totDone">$0.00</td>
+              <td class="px-2 py-2 text-right" id="totPct">0.0%</td>
+              <td class="px-2 py-2 text-right" id="totBal">$0.00</td>
+              <td></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+
+    <!-- Summary -->
+    <div class="bg-slate-800 rounded-xl border border-slate-700 p-6">
+      <h2 class="text-lg font-semibold text-white mb-4">Payment Summary</h2>
+      <div class="max-w-sm space-y-2 text-sm">
+        <div class="flex justify-between text-slate-300"><span>Original Contract Sum</span><span id="s1">$0.00</span></div>
+        <div class="flex justify-between text-slate-300"><span>Net Change by Change Orders</span><span id="s2">$0.00</span></div>
+        <div class="flex justify-between text-slate-300"><span>Contract Sum to Date</span><span id="s3">$0.00</span></div>
+        <div class="flex justify-between text-slate-300"><span>Total Completed & Stored</span><span id="s4">$0.00</span></div>
+        <div class="flex justify-between text-slate-300"><span id="retLabel">Retainage (10%)</span><span id="s5">$0.00</span></div>
+        <div class="flex justify-between text-slate-300"><span>Total Earned Less Retainage</span><span id="s6">$0.00</span></div>
+        <div class="flex justify-between text-slate-300"><span>Less Previous Certificates</span><span id="s7">$0.00</span></div>
+        <div class="flex justify-between bg-blue-600 text-white font-bold text-base px-3 py-2 rounded-lg mt-2">
+          <span>CURRENT PAYMENT DUE</span><span id="s8">$0.00</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Certification & Signature -->
+    <div class="bg-slate-800 rounded-xl border border-slate-700 p-6">
+      <h2 class="text-lg font-semibold text-white mb-3">Certification & Signature</h2>
+      <p class="text-slate-400 text-sm mb-4 bg-slate-700 rounded-lg p-3 italic">The undersigned Subcontractor certifies that to the best of the Subcontractor's knowledge, information and belief the Work covered by this Application for Payment has been completed in accordance with the Contract Documents, that all amounts have been paid by the Subcontractor for Work for which previous Certificates for Payment were issued and payments received from the Contractor, and that current payment shown herein is now due.</p>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">Printed Name & Title</label>
+          <input type="text" id="signerName" placeholder="Jane Smith, Project Manager" class="w-full rounded-lg border px-3 py-2 text-sm"/>
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">Date</label>
+          <input type="date" id="signDate" class="w-full rounded-lg border px-3 py-2 text-sm"/>
+        </div>
+      </div>
+      <label class="block text-xs text-slate-400 mb-2">Signature</label>
+      <canvas id="sigPad" class="sig-canvas" data-signature-pad data-signature-label="Signature" data-clear-pad="sigPad"></canvas>
+      <button type="button" data-clear-pad="sigPad" onclick="sigInstance && sigInstance.clear()" class="mt-2 text-xs text-slate-400 hover:text-white underline">Clear Signature</button>
+    </div>
+
+    <!-- Disclaimer -->
+    <p class="text-slate-500 text-xs text-center">SubPaperz Pay Application is a functional equivalent of AIA G702. It does not constitute legal advice. Consult a licensed attorney if needed.</p>
+
+    <!-- Actions -->
+    <div class="flex flex-wrap gap-3 pb-8">
+      <button type="button" onclick="downloadPDF()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold text-sm shadow-lg">⬇ Download PDF</button>
+      <button type="button" onclick="clearForm()" class="border border-slate-600 text-slate-300 hover:text-white px-6 py-3 rounded-lg text-sm">Clear Form</button>
+    </div>
+  </form>
+</div>
+
+<script src="/js/config.js"></script>
+<script src="/js/pdf-pay-app.js"></script>
+<script src="/js/esign.js"></script>
+<script>
+let rowCount = 0;
+let sigInstance = null;
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('appDate').value = new Date().toISOString().split('T')[0];
+  document.getElementById('signDate').value = new Date().toISOString().split('T')[0];
+  addRow(); addRow(); addRow(); // start with 3 rows
+  recalc();
+  sigInstance = new ESignature('sigPad', { label: 'Signature', required: true });
+  sigInstance.init();
+});
+
+function fmt(n) {
+  return '$' + (parseFloat(n)||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+function pct(n) { return (parseFloat(n)||0).toFixed(1) + '%'; }
+
+function addRow() {
+  rowCount++;
+  const tbody = document.getElementById('sovBody');
+  const tr = document.createElement('tr');
+  tr.id = 'row_' + rowCount;
+  tr.className = rowCount % 2 === 0 ? 'bg-slate-800' : 'bg-slate-750';
+  tr.innerHTML = `
+    <td class="px-2 py-1 text-slate-400 text-xs">${rowCount}</td>
+    <td class="px-2 py-1"><input type="text" placeholder="Description..." class="w-full bg-transparent text-slate-200 text-xs border-b border-slate-600 focus:border-blue-400 outline-none py-1" oninput="recalc()"/></td>
+    <td class="px-2 py-1"><input type="number" placeholder="0" class="w-20 bg-transparent text-right text-slate-200 text-xs border-b border-slate-600 focus:border-blue-400 outline-none py-1" oninput="recalcRow(this)" data-col="sv"/></td>
+    <td class="px-2 py-1"><input type="number" placeholder="0" class="w-20 bg-transparent text-right text-slate-200 text-xs border-b border-slate-600 focus:border-blue-400 outline-none py-1" oninput="recalcRow(this)" data-col="prev"/></td>
+    <td class="px-2 py-1"><input type="number" placeholder="0" class="w-20 bg-transparent text-right text-slate-200 text-xs border-b border-slate-600 focus:border-blue-400 outline-none py-1" oninput="recalcRow(this)" data-col="curr"/></td>
+    <td class="px-2 py-1"><input type="number" placeholder="0" class="w-20 bg-transparent text-right text-slate-200 text-xs border-b border-slate-600 focus:border-blue-400 outline-none py-1" oninput="recalcRow(this)" data-col="stored"/></td>
+    <td class="px-2 py-1 text-right text-blue-300 text-xs font-medium" data-total="done">$0.00</td>
+    <td class="px-2 py-1 text-right text-slate-300 text-xs" data-total="pct">0.0%</td>
+    <td class="px-2 py-1 text-right text-slate-300 text-xs" data-total="bal">$0.00</td>
+    <td class="px-2 py-1"><button type="button" onclick="removeRow(${rowCount})" class="text-red-400 hover:text-red-300 text-xs">✕</button></td>
+  `;
+  tbody.appendChild(tr);
+}
+
+function removeRow(id) {
+  const row = document.getElementById('row_' + id);
+  if (row) row.remove();
+  recalc();
+}
+
+function recalcRow(input) { recalc(); }
+
+function recalc() {
+  let totSv=0, totPrev=0, totCurr=0, totStored=0, totDone=0, totBal=0;
+  document.querySelectorAll('#sovBody tr').forEach(tr => {
+    const inputs = tr.querySelectorAll('input[type="number"]');
+    if (inputs.length < 4) return;
+    const sv = parseFloat(inputs[0].value)||0;
+    const prev = parseFloat(inputs[1].value)||0;
+    const curr = parseFloat(inputs[2].value)||0;
+    const stored = parseFloat(inputs[3].value)||0;
+    const done = prev + curr + stored;
+    const p = sv > 0 ? done/sv*100 : 0;
+    const bal = sv - done;
+    tr.querySelector('[data-total="done"]').textContent = fmt(done);
+    tr.querySelector('[data-total="pct"]').textContent = pct(p);
+    tr.querySelector('[data-total="bal"]').textContent = fmt(bal);
+    totSv+=sv; totPrev+=prev; totCurr+=curr; totStored+=stored; totDone+=done; totBal+=bal;
+  });
+  document.getElementById('totSched').textContent = fmt(totSv);
+  document.getElementById('totPrev').textContent = fmt(totPrev);
+  document.getElementById('totThis').textContent = fmt(totCurr);
+  document.getElementById('totStored').textContent = fmt(totStored);
+  document.getElementById('totDone').textContent = fmt(totDone);
+  document.getElementById('totPct').textContent = pct(totSv>0?totDone/totSv*100:0);
+  document.getElementById('totBal').textContent = fmt(totBal);
+
+  const ret = parseFloat(document.getElementById('retainage').value)||10;
+  const orig = parseFloat(document.getElementById('originalContract').value)||0;
+  const co = parseFloat(document.getElementById('changeOrders').value)||0;
+  const prevCerts = parseFloat(document.getElementById('previousCertificates').value)||0;
+  const retAmt = totDone * (ret/100);
+  const earned = totDone - retAmt;
+  const due = earned - prevCerts;
+  document.getElementById('retLabel').textContent = `Retainage (${ret}%)`;
+  document.getElementById('s1').textContent = fmt(orig);
+  document.getElementById('s2').textContent = fmt(co);
+  document.getElementById('s3').textContent = fmt(orig+co);
+  document.getElementById('s4').textContent = fmt(totDone);
+  document.getElementById('s5').textContent = fmt(retAmt);
+  document.getElementById('s6').textContent = fmt(earned);
+  document.getElementById('s7').textContent = fmt(prevCerts);
+  document.getElementById('s8').textContent = fmt(due);
+}
+
+function getLineItems() {
+  const items = [];
+  document.querySelectorAll('#sovBody tr').forEach((tr, idx) => {
+    const desc = tr.querySelector('input[type="text"]');
+    const nums = tr.querySelectorAll('input[type="number"]');
+    if (!nums.length) return;
+    items.push({
+      item: idx+1,
+      description: desc ? desc.value : '',
+      scheduledValue: nums[0]?.value||0,
+      previousCompleted: nums[1]?.value||0,
+      thisPeriod: nums[2]?.value||0,
+      stored: nums[3]?.value||0,
+    });
+  });
+  return items;
+}
+
+function getFormData() {
+  return {
+    appNumber: document.getElementById('appNumber').value,
+    appDate: document.getElementById('appDate').value,
+    periodFrom: document.getElementById('periodFrom').value,
+    periodTo: document.getElementById('periodTo').value,
+    originalContract: document.getElementById('originalContract').value,
+    changeOrders: document.getElementById('changeOrders').value,
+    retainage: document.getElementById('retainage').value,
+    previousCertificates: document.getElementById('previousCertificates').value,
+    contractDate: document.getElementById('contractDate').value,
+    projectName: document.getElementById('projectName').value,
+    projectAddress: document.getElementById('projectAddress').value,
+    ownerName: document.getElementById('ownerName').value,
+    subName: document.getElementById('subName').value,
+    signerName: document.getElementById('signerName').value,
+    signDate: document.getElementById('signDate').value,
+  };
+}
+
+function downloadPDF() {
+  const fd = getFormData();
+  const li = getLineItems();
+  const sig = sigInstance ? sigInstance.getDataURL() : null;
+  const doc = generatePayAppPDF(fd, li, sig);
+  doc.save(`pay-app-${fd.appNumber || '1'}-${fd.subName || 'subpaperz'}.pdf`);
+}
+
+function clearForm() {
+  if (confirm('Clear all form data?')) {
+    document.getElementById('payAppForm').reset();
+    document.getElementById('sovBody').innerHTML = '';
+    rowCount = 0;
+    if (sigInstance) sigInstance.clear();
+    addRow(); addRow(); addRow();
+    recalc();
+  }
+}
+</script>
+</body>
+</html>
