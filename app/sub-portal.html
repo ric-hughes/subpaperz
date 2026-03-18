@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Subcontractor Portal — SubPaperz</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+body { background:#0f172a; }
+input,select { background:#1e293b!important; color:#f1f5f9!important; border-color:#334155!important; }
+input:focus { border-color:#3b82f6!important; outline:none; }
+</style>
+</head>
+<body class="min-h-screen text-slate-100 font-sans px-4 py-12">
+
+<div class="w-full max-w-lg mx-auto">
+
+  <!-- Logo -->
+  <div class="text-center mb-8">
+    <a href="https://subpaperz.com" class="text-blue-400 font-bold text-2xl tracking-tight">SubPaperz</a>
+    <p class="text-slate-500 text-sm mt-1">Subcontractor Paperwork Platform</p>
+  </div>
+
+  <!-- Loading -->
+  <div id="loadingState" class="bg-slate-800 rounded-2xl border border-slate-700 p-8 text-center">
+    <div class="text-slate-400 text-sm">Loading your portal...</div>
+  </div>
+
+  <!-- Error -->
+  <div id="errorState" class="hidden bg-slate-800 rounded-2xl border border-red-800 p-8 text-center">
+    <div class="text-4xl mb-4">⚠️</div>
+    <h2 class="text-white font-bold text-lg mb-2">Link Not Valid</h2>
+    <p class="text-slate-400 text-sm" id="errorMsg">This portal link has expired or is invalid. Please contact your general contractor for a new link.</p>
+  </div>
+
+  <!-- Portal -->
+  <div id="portalContent" class="hidden space-y-6">
+
+    <!-- Header -->
+    <div class="bg-slate-800 rounded-2xl border border-slate-700 px-6 py-5">
+      <h1 class="text-white font-bold text-xl">Your Subcontractor Portal</h1>
+      <p class="text-slate-400 text-sm mt-1" id="portalSubInfo"></p>
+    </div>
+
+    <!-- Section 1: Your Info -->
+    <div class="bg-slate-800 rounded-2xl border border-slate-700">
+      <div class="px-6 py-4 border-b border-slate-700 flex items-center justify-between">
+        <div>
+          <h2 class="text-white font-semibold">Your Info</h2>
+          <p class="text-slate-500 text-xs mt-0.5">Update your contact details on file.</p>
+        </div>
+        <span id="infoSaved" class="hidden text-green-400 text-xs font-semibold">✓ Saved</span>
+      </div>
+      <div class="p-6 space-y-4">
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs text-slate-400 mb-1.5 font-semibold">Phone</label>
+            <input type="tel" id="infoPhone" placeholder="(208) 555-0100" class="w-full rounded-lg border px-3 py-2 text-sm"/>
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1.5 font-semibold">License Number</label>
+            <input type="text" id="infoLicense" placeholder="RCE-12345" class="w-full rounded-lg border px-3 py-2 text-sm"/>
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1.5 font-semibold">Address</label>
+          <input type="text" id="infoAddress" placeholder="123 Main St, Boise, ID 83701" class="w-full rounded-lg border px-3 py-2 text-sm"/>
+        </div>
+        <div id="infoError" class="hidden bg-red-900/40 border border-red-600 text-red-300 rounded-lg px-3 py-2 text-sm"></div>
+      </div>
+      <div class="px-6 py-4 border-t border-slate-700">
+        <button onclick="saveInfo()" id="saveInfoBtn"
+          class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl text-sm font-bold transition-colors">
+          Save Info
+        </button>
+      </div>
+    </div>
+
+    <!-- Section 2: Upload COI -->
+    <div class="bg-slate-800 rounded-2xl border border-slate-700">
+      <div class="px-6 py-4 border-b border-slate-700 flex items-center justify-between">
+        <div>
+          <h2 class="text-white font-semibold">Certificate of Insurance</h2>
+          <p class="text-slate-500 text-xs mt-0.5">Upload your current COI.</p>
+        </div>
+        <span id="coiSaved" class="hidden text-green-400 text-xs font-semibold">✓ Uploaded</span>
+      </div>
+      <div class="p-6 space-y-4">
+        <div>
+          <label class="block text-xs text-slate-400 mb-1.5 font-semibold">COI File (PDF or image) *</label>
+          <input type="file" id="coiFile" accept=".pdf,image/*"
+            class="w-full rounded-lg border px-3 py-2 text-sm file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-blue-900 file:text-blue-300 hover:file:bg-blue-800"/>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs text-slate-400 mb-1.5 font-semibold">Expiry Date *</label>
+            <input type="date" id="coiExpiry" class="w-full rounded-lg border px-3 py-2 text-sm"/>
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1.5 font-semibold">Insurer Name</label>
+            <input type="text" id="coiInsurer" placeholder="e.g. State Farm" class="w-full rounded-lg border px-3 py-2 text-sm"/>
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1.5 font-semibold">Policy Number</label>
+          <input type="text" id="coiPolicy" placeholder="Optional" class="w-full rounded-lg border px-3 py-2 text-sm"/>
+        </div>
+        <div id="coiError" class="hidden bg-red-900/40 border border-red-600 text-red-300 rounded-lg px-3 py-2 text-sm"></div>
+      </div>
+      <div class="px-6 py-4 border-t border-slate-700">
+        <button onclick="uploadCOI()" id="coiBtn"
+          class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl text-sm font-bold transition-colors">
+          Upload COI
+        </button>
+      </div>
+    </div>
+
+    <!-- Section 3: Upload W-9 -->
+    <div class="bg-slate-800 rounded-2xl border border-slate-700">
+      <div class="px-6 py-4 border-b border-slate-700 flex items-center justify-between">
+        <div>
+          <h2 class="text-white font-semibold">W-9 Form</h2>
+          <p class="text-slate-500 text-xs mt-0.5">Upload your completed W-9.</p>
+        </div>
+        <span id="w9Saved" class="hidden text-green-400 text-xs font-semibold">✓ Uploaded</span>
+      </div>
+      <div class="p-6 space-y-4">
+        <div>
+          <label class="block text-xs text-slate-400 mb-1.5 font-semibold">W-9 File (PDF) *</label>
+          <input type="file" id="w9File" accept=".pdf,image/*"
+            class="w-full rounded-lg border px-3 py-2 text-sm file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-blue-900 file:text-blue-300 hover:file:bg-blue-800"/>
+        </div>
+        <div id="w9Error" class="hidden bg-red-900/40 border border-red-600 text-red-300 rounded-lg px-3 py-2 text-sm"></div>
+      </div>
+      <div class="px-6 py-4 border-t border-slate-700">
+        <button onclick="uploadW9()" id="w9Btn"
+          class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl text-sm font-bold transition-colors">
+          Upload W-9
+        </button>
+      </div>
+    </div>
+
+    <p class="text-center text-xs text-slate-600 pb-4">Your files are stored securely. Your general contractor will be notified automatically.</p>
+
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/js/config.js"></script>
+<script>
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let subRecord = null;
+let portalToken = null;
+
+async function init() {
+  const params = new URLSearchParams(window.location.search);
+  portalToken = params.get('token');
+
+  if (!portalToken) { showError('No portal token found. Please use the link from your email.'); return; }
+
+  try {
+    const { data, error } = await db
+      .from('subcontractors')
+      .select('*')
+      .eq('portal_token', portalToken)
+      .single();
+
+    if (error || !data) {
+      showError('This portal link has expired or is invalid. Please contact your general contractor for a new link.');
+      return;
+    }
+
+    subRecord = data;
+    showPortal();
+  } catch (e) {
+    showError('Something went wrong loading your portal. Please try again.');
+  }
+}
+
+function showError(msg) {
+  document.getElementById('loadingState').classList.add('hidden');
+  document.getElementById('errorMsg').textContent = msg;
+  document.getElementById('errorState').classList.remove('hidden');
+}
+
+function showPortal() {
+  document.getElementById('loadingState').classList.add('hidden');
+  const name = subRecord.contact_name || subRecord.company_name || 'Subcontractor';
+  document.getElementById('portalSubInfo').textContent = name + (subRecord.company_name ? ' — ' + subRecord.company_name : '');
+  document.getElementById('infoPhone').value = subRecord.phone || '';
+  document.getElementById('infoAddress').value = subRecord.address || '';
+  document.getElementById('infoLicense').value = subRecord.license_number || '';
+  document.getElementById('portalContent').classList.remove('hidden');
+}
+
+async function saveInfo() {
+  const btn = document.getElementById('saveInfoBtn');
+  const errEl = document.getElementById('infoError');
+  errEl.classList.add('hidden');
+  btn.textContent = 'Saving...'; btn.disabled = true;
+  try {
+    const updates = {
+      phone: document.getElementById('infoPhone').value.trim() || null,
+      address: document.getElementById('infoAddress').value.trim() || null,
+      license_number: document.getElementById('infoLicense').value.trim() || null,
+    };
+    const { error } = await db.from('subcontractors')
+      .update(updates)
+      .eq('portal_token', portalToken);
+    if (error) throw error;
+    document.getElementById('infoSaved').classList.remove('hidden');
+  } catch (e) {
+    errEl.textContent = 'Save failed: ' + e.message;
+    errEl.classList.remove('hidden');
+  }
+  btn.textContent = 'Save Info'; btn.disabled = false;
+}
+
+async function uploadCOI() {
+  const file = document.getElementById('coiFile').files[0];
+  const expiry = document.getElementById('coiExpiry').value;
+  const errEl = document.getElementById('coiError');
+  errEl.classList.add('hidden');
+  if (!file) { errEl.textContent = 'Please select a COI file.'; errEl.classList.remove('hidden'); return; }
+  if (!expiry) { errEl.textContent = 'Please enter the expiry date.'; errEl.classList.remove('hidden'); return; }
+
+  const btn = document.getElementById('coiBtn');
+  btn.textContent = 'Uploading...'; btn.disabled = true;
+  try {
+    const ext = file.name.split('.').pop();
+    const path = 'public/sub-portal/' + portalToken + '/coi_' + Date.now() + '.' + ext;
+    const { error: storageErr } = await db.storage.from('coi-uploads').upload(path, file, { contentType: file.type, upsert: true });
+    if (storageErr) throw storageErr;
+
+    const record = {
+      owner_id: subRecord.owner_id,
+      sub_id: subRecord.id,
+      storage_path: path,
+      expiry_date: expiry,
+      reminder_30_sent: false,
+    };
+    if (document.getElementById('coiInsurer').value.trim()) record.insurer_name = document.getElementById('coiInsurer').value.trim();
+    if (document.getElementById('coiPolicy').value.trim()) record.policy_number = document.getElementById('coiPolicy').value.trim();
+
+    const { error: insertErr } = await db.from('coi_records').insert(record);
+    if (insertErr) throw insertErr;
+
+    document.getElementById('coiSaved').classList.remove('hidden');
+    btn.textContent = '✓ COI Uploaded'; btn.disabled = true;
+    btn.classList.replace('bg-blue-600', 'bg-green-700');
+    btn.classList.replace('hover:bg-blue-700', 'hover:bg-green-700');
+  } catch (e) {
+    errEl.textContent = 'Upload failed: ' + e.message;
+    errEl.classList.remove('hidden');
+    btn.textContent = 'Upload COI'; btn.disabled = false;
+  }
+}
+
+async function uploadW9() {
+  const file = document.getElementById('w9File').files[0];
+  const errEl = document.getElementById('w9Error');
+  errEl.classList.add('hidden');
+  if (!file) { errEl.textContent = 'Please select a W-9 file.'; errEl.classList.remove('hidden'); return; }
+
+  const btn = document.getElementById('w9Btn');
+  btn.textContent = 'Uploading...'; btn.disabled = true;
+  try {
+    const ext = file.name.split('.').pop();
+    const path = 'public/sub-portal/' + portalToken + '/w9_' + Date.now() + '.' + ext;
+    const { error: storageErr } = await db.storage.from('coi-uploads').upload(path, file, { contentType: file.type, upsert: true });
+    if (storageErr) throw storageErr;
+
+    const { error: insertErr } = await db.from('documents').insert({
+      owner_id: subRecord.owner_id,
+      sub_id: subRecord.id,
+      doc_type: 'w9',
+      status: 'signed',
+      storage_path: path,
+    });
+    if (insertErr) throw insertErr;
+
+    document.getElementById('w9Saved').classList.remove('hidden');
+    btn.textContent = '✓ W-9 Uploaded'; btn.disabled = true;
+    btn.classList.replace('bg-blue-600', 'bg-green-700');
+    btn.classList.replace('hover:bg-blue-700', 'hover:bg-green-700');
+  } catch (e) {
+    errEl.textContent = 'Upload failed: ' + e.message;
+    errEl.classList.remove('hidden');
+    btn.textContent = 'Upload W-9'; btn.disabled = false;
+  }
+}
+
+init();
+</script>
+</body>
+</html>

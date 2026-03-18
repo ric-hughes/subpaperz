@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard — SubPaperz</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/css/app.css" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            navy: { 950: '#020617', 900: '#0f172a', 800: '#1e293b', 700: '#334155' }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-slate-950 text-slate-100 antialiased p-6 md:p-8">
+
+<!-- ═══════════════════════════════════════════════════
+     PAGE HEADER
+════════════════════════════════════════════════════ -->
+<div class="mb-8">
+  <h1 class="text-2xl font-black text-white">Compliance Dashboard</h1>
+  <p class="text-slate-400 text-sm mt-1">Your project paperwork at a glance.</p>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     TOP STATS ROW
+════════════════════════════════════════════════════ -->
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+
+  <!-- Total Subs -->
+  <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex items-start gap-4">
+    <div class="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center shrink-0">
+      <span class="text-lg">👷</span>
+    </div>
+    <div>
+      <p class="text-xs text-slate-500 font-semibold uppercase tracking-wide mb-1">Total Subs</p>
+      <p class="text-2xl font-black text-white" id="stat-total-subs">0</p>
+      <p class="text-xs text-slate-500 mt-0.5">Add your first project to get started</p>
+    </div>
+  </div>
+
+  <!-- Documents Complete -->
+  <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex items-start gap-4">
+    <div class="w-10 h-10 rounded-xl bg-green-950 flex items-center justify-center shrink-0">
+      <span class="text-lg">✅</span>
+    </div>
+    <div>
+      <p class="text-xs text-slate-500 font-semibold uppercase tracking-wide mb-1">Docs Complete</p>
+      <p class="text-2xl font-black text-green-400" id="stat-docs-complete">0</p>
+      <p class="text-xs text-slate-500 mt-0.5">Signed &amp; filed</p>
+    </div>
+  </div>
+
+  <!-- COIs Active -->
+  <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex items-start gap-4">
+    <div class="w-10 h-10 rounded-xl bg-blue-950 flex items-center justify-center shrink-0">
+      <span class="text-lg">🛡️</span>
+    </div>
+    <div>
+      <p class="text-xs text-slate-500 font-semibold uppercase tracking-wide mb-1">COIs Active</p>
+      <p class="text-2xl font-black text-blue-400" id="stat-cois-active">0</p>
+      <p class="text-xs text-slate-500 mt-0.5">Valid certificates</p>
+    </div>
+  </div>
+
+  <!-- Expiring Soon -->
+  <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex items-start gap-4">
+    <div class="w-10 h-10 rounded-xl bg-yellow-950 flex items-center justify-center shrink-0">
+      <span class="text-lg">⏰</span>
+    </div>
+    <div>
+      <p class="text-xs text-slate-500 font-semibold uppercase tracking-wide mb-1">Expiring Soon</p>
+      <p class="text-2xl font-black text-yellow-400" id="stat-expiring-soon">0</p>
+      <p class="text-xs text-slate-500 mt-0.5">Within 30 days</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     QUICK ACTIONS
+════════════════════════════════════════════════════ -->
+<div class="mb-8">
+  <h2 class="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-4">Quick Actions</h2>
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+
+    <a href="/forms/w9.html" class="group flex flex-col items-center gap-2 p-5 rounded-2xl bg-slate-900 border border-slate-800 hover:border-blue-700 hover:bg-slate-800 transition-all hover:-translate-y-0.5">
+      <span class="text-3xl group-hover:scale-110 transition-transform">🪪</span>
+      <span class="text-sm font-semibold text-slate-300 group-hover:text-white transition-colors">New W-9</span>
+    </a>
+
+    <a href="/forms/lien-waiver.html" class="group flex flex-col items-center gap-2 p-5 rounded-2xl bg-slate-900 border border-slate-800 hover:border-blue-700 hover:bg-slate-800 transition-all hover:-translate-y-0.5">
+      <span class="text-3xl group-hover:scale-110 transition-transform">📋</span>
+      <span class="text-sm font-semibold text-slate-300 group-hover:text-white transition-colors">New Lien Waiver</span>
+    </a>
+
+    <a href="/app/coi-tracker.html" class="group flex flex-col items-center gap-2 p-5 rounded-2xl bg-slate-900 border border-slate-800 hover:border-blue-700 hover:bg-slate-800 transition-all hover:-translate-y-0.5">
+      <span class="text-3xl group-hover:scale-110 transition-transform">🛡️</span>
+      <span class="text-sm font-semibold text-slate-300 group-hover:text-white transition-colors">Upload COI</span>
+    </a>
+
+    <a href="/forms/sub-agreement.html" class="group flex flex-col items-center gap-2 p-5 rounded-2xl bg-slate-900 border border-slate-800 hover:border-blue-700 hover:bg-slate-800 transition-all hover:-translate-y-0.5">
+      <span class="text-3xl group-hover:scale-110 transition-transform">🤝</span>
+      <span class="text-sm font-semibold text-slate-300 group-hover:text-white transition-colors">New Sub Agreement</span>
+    </a>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     RECENT DOCUMENTS TABLE
+════════════════════════════════════════════════════ -->
+<div class="mb-8">
+  <div class="flex items-center justify-between mb-4">
+    <h2 class="text-sm font-semibold text-slate-400 uppercase tracking-wider">Recent Documents</h2>
+    <a href="/app/documents.html" class="text-xs text-blue-400 hover:text-blue-300 font-medium transition-colors">View all →</a>
+  </div>
+  <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm" id="recent-docs-table">
+        <thead>
+          <tr class="border-b border-slate-800">
+            <th class="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">Document</th>
+            <th class="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">Sub Name</th>
+            <th class="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wide hidden sm:table-cell">Type</th>
+            <th class="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">Status</th>
+            <th class="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wide hidden md:table-cell">Date</th>
+          </tr>
+        </thead>
+        <tbody id="recent-docs-body">
+          <!-- Populated by JS or shows empty state -->
+        </tbody>
+      </table>
+    </div>
+    <!-- Empty state -->
+    <div id="recent-docs-empty" class="px-5 py-12 text-center">
+      <div class="text-4xl mb-3">📂</div>
+      <p class="text-white font-semibold mb-1">No documents yet.</p>
+      <p class="text-slate-400 text-sm">Start by adding a subcontractor and sending your first document.</p>
+      <a href="/app/subs.html" class="inline-flex items-center gap-1.5 mt-4 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition-colors">
+        Add a Subcontractor
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     BOTTOM GRID: COI ALERTS + ACTIVE PROJECTS
+════════════════════════════════════════════════════ -->
+<div class="grid lg:grid-cols-2 gap-6">
+
+  <!-- COI Expiry Alerts -->
+  <div>
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-sm font-semibold text-slate-400 uppercase tracking-wider">COI Expiry Alerts</h2>
+      <a href="/app/coi-tracker.html" class="text-xs text-blue-400 hover:text-blue-300 font-medium transition-colors">Manage →</a>
+    </div>
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
+      <div id="coi-alerts-list">
+        <!-- Populated by JS -->
+      </div>
+      <div id="coi-alerts-empty" class="px-5 py-10 text-center">
+        <div class="text-3xl mb-2">✅</div>
+        <p class="text-white font-semibold text-sm mb-1">All COIs current.</p>
+        <p class="text-slate-500 text-xs">No certificates expiring in the next 60 days.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Active Projects -->
+  <div>
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-sm font-semibold text-slate-400 uppercase tracking-wider">Active Projects</h2>
+      <a href="/app/projects.html" class="text-xs text-blue-400 hover:text-blue-300 font-medium transition-colors">View all →</a>
+    </div>
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
+      <div id="active-projects-list">
+        <!-- Populated by JS -->
+      </div>
+      <div id="active-projects-empty" class="px-5 py-10 text-center">
+        <div class="text-3xl mb-2">🏗️</div>
+        <p class="text-white font-semibold text-sm mb-1">No active projects.</p>
+        <p class="text-slate-500 text-xs">Create your first project to get started.</p>
+        <a href="/app/projects.html" class="inline-flex items-center gap-1.5 mt-3 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition-colors">
+          New Project
+        </a>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     SUB COMPLIANCE BADGES
+════════════════════════════════════════════════════ -->
+<div class="mt-6">
+  <div class="flex items-center justify-between mb-4">
+    <h2 class="text-sm font-semibold text-slate-400 uppercase tracking-wider">Sub Compliance</h2>
+    <a href="/app/subs.html" class="text-xs text-blue-400 hover:text-blue-300 font-medium transition-colors">Manage →</a>
+  </div>
+  <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
+    <div id="sub-compliance-list"></div>
+    <div id="sub-compliance-empty" class="px-5 py-10 text-center">
+      <div class="text-3xl mb-2">👷</div>
+      <p class="text-white font-semibold text-sm mb-1">No subcontractors yet.</p>
+      <p class="text-slate-500 text-xs">Add subs to track their compliance status.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     DASHBOARD SCRIPTS
+════════════════════════════════════════════════════ -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/js/config.js"></script>
+<script src="/js/supabase-client.js"></script>
+<script src="/js/utils.js"></script>
+
+<script>
+(async function initDashboard() {
+  // Status badge helper
+  function statusBadge(status) {
+    const map = {
+      signed:  'bg-green-950 text-green-400 border-green-900',
+      active:  'bg-green-950 text-green-400 border-green-900',
+      pending: 'bg-yellow-950 text-yellow-400 border-yellow-900',
+      draft:   'bg-slate-800 text-slate-400 border-slate-700',
+      expired: 'bg-red-950 text-red-400 border-red-900',
+    };
+    const cls = map[status?.toLowerCase()] || map.draft;
+    const label = (status || 'draft').charAt(0).toUpperCase() + (status || 'draft').slice(1);
+    return `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold border ${cls}">${label}</span>`;
+  }
+
+  // If db is available (Supabase client loaded), fetch real data
+  if (typeof db !== 'undefined') {
+    try {
+      const { data: { user } } = await db.auth.getUser();
+      if (!user) return;
+
+      // Fetch stats
+      const [
+        { count: totalSubs },
+        { data: docs },
+        { data: cois }
+      ] = await Promise.all([
+        db.from('subcontractors').select('*', { count: 'exact', head: true }).eq('user_id', user.id),
+        db.from('documents').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(10),
+        db.from('cois').select('*').eq('user_id', user.id)
+      ]);
+
+      // Update stat counters
+      document.getElementById('stat-total-subs').textContent = totalSubs ?? 0;
+
+      const completeDocs = (docs || []).filter(d => d.status === 'signed').length;
+      document.getElementById('stat-docs-complete').textContent = completeDocs;
+
+      const now = new Date();
+      const in30 = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+      const in60 = new Date(now.getTime() + 60 * 24 * 60 * 60 * 1000);
+
+      const activeCois   = (cois || []).filter(c => new Date(c.expiry_date) > now);
+      const expiringSoon = (cois || []).filter(c => {
+        const d = new Date(c.expiry_date);
+        return d > now && d <= in30;
+      });
+
+      document.getElementById('stat-cois-active').textContent = activeCois.length;
+      document.getElementById('stat-expiring-soon').textContent = expiringSoon.length;
+
+      // Recent docs table
+      if (docs && docs.length > 0) {
+        document.getElementById('recent-docs-empty').classList.add('hidden');
+        const tbody = document.getElementById('recent-docs-body');
+        tbody.innerHTML = docs.map(doc => `
+          <tr class="border-b border-slate-800/60 hover:bg-slate-800/30 transition-colors">
+            <td class="px-5 py-3.5 text-slate-200 font-medium">${doc.title || 'Untitled'}</td>
+            <td class="px-5 py-3.5 text-slate-400">${doc.sub_name || '—'}</td>
+            <td class="px-5 py-3.5 text-slate-400 hidden sm:table-cell">${doc.doc_type || '—'}</td>
+            <td class="px-5 py-3.5">${statusBadge(doc.status)}</td>
+            <td class="px-5 py-3.5 text-slate-500 hidden md:table-cell">${typeof formatDate === 'function' ? formatDate(doc.created_at) : doc.created_at?.slice(0, 10)}</td>
+          </tr>`).join('');
+      }
+
+      // COI alerts
+      const expiring60 = (cois || []).filter(c => {
+        const d = new Date(c.expiry_date);
+        return d > now && d <= in60;
+      });
+      const expired = (cois || []).filter(c => new Date(c.expiry_date) <= now);
+      const alertItems = [...expired, ...expiring60];
+
+      if (alertItems.length > 0) {
+        document.getElementById('coi-alerts-empty').classList.add('hidden');
+        const list = document.getElementById('coi-alerts-list');
+        list.innerHTML = alertItems.map(coi => {
+          const days = typeof daysUntil === 'function' ? daysUntil(coi.expiry_date) : 0;
+          const isExpired = days < 0;
+          return `
+            <div class="flex items-center gap-3 px-5 py-3.5 border-b border-slate-800/60 last:border-0">
+              <span class="text-xl">${isExpired ? '🔴' : '🟡'}</span>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-semibold text-white truncate">${coi.sub_name || 'Unknown Sub'}</p>
+                <p class="text-xs text-slate-500">Expires: ${typeof formatDate === 'function' ? formatDate(coi.expiry_date) : coi.expiry_date}</p>
+              </div>
+              <span class="text-xs font-bold ${isExpired ? 'text-red-400' : 'text-yellow-400'} shrink-0">
+                ${isExpired ? 'Expired' : `${days}d left`}
+              </span>
+            </div>`;
+        }).join('');
+      }
+
+      // Active projects
+      const { data: projects } = await db.from('projects')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('status', 'active')
+        .order('created_at', { ascending: false })
+        .limit(5);
+
+      if (projects && projects.length > 0) {
+        document.getElementById('active-projects-empty').classList.add('hidden');
+        const list = document.getElementById('active-projects-list');
+        list.innerHTML = projects.map(p => `
+          <a href="/app/projects.html?id=${p.id}" class="flex items-center gap-3 px-5 py-3.5 border-b border-slate-800/60 last:border-0 hover:bg-slate-800/30 transition-colors group">
+            <span class="text-xl">🏗️</span>
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-semibold text-white truncate group-hover:text-blue-300 transition-colors">${p.name || 'Unnamed Project'}</p>
+              <p class="text-xs text-slate-500">${p.location || p.state || ''}</p>
+            </div>
+            <svg class="w-4 h-4 text-slate-600 group-hover:text-slate-400 transition-colors shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+          </a>`).join('');
+      }
+
+    } catch (err) {
+      console.warn('Dashboard data load error:', err);
+    }
+  }
+})();
+
+// Sub compliance badges
+(async function loadSubCompliance() {
+  if (typeof db === 'undefined') return;
+  try {
+    const { data: { user } } = await db.auth.getUser();
+    if (!user) return;
+
+    const { data: subs } = await db.from('subcontractors').select('id, company_name, contact_name').eq('owner_id', user.id).order('company_name').limit(20);
+    if (!subs || !subs.length) return;
+
+    const today = new Date().toISOString().split('T')[0];
+    const subIds = subs.map(s => s.id);
+
+    const [{ data: w9s }, { data: cois }, { data: agreements }] = await Promise.all([
+      db.from('documents').select('sub_id').in('sub_id', subIds).eq('doc_type', 'w9').eq('status', 'signed'),
+      db.from('coi_records').select('sub_id').in('sub_id', subIds).gte('expiry_date', today),
+      db.from('documents').select('sub_id').in('sub_id', subIds).eq('doc_type', 'sub_agreement').eq('status', 'signed'),
+    ]);
+
+    const w9Set = new Set((w9s||[]).map(r => r.sub_id));
+    const coiSet = new Set((cois||[]).map(r => r.sub_id));
+    const agreementSet = new Set((agreements||[]).map(r => r.sub_id));
+
+    function badge(ok, label) {
+      return ok
+        ? `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold border bg-green-950 text-green-400 border-green-900">${label} ✓</span>`
+        : `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold border bg-red-950 text-red-400 border-red-900">${label} ✗</span>`;
+    }
+
+    document.getElementById('sub-compliance-empty').classList.add('hidden');
+    document.getElementById('sub-compliance-list').innerHTML = subs.map(s => `
+      <div class="flex items-center gap-3 px-5 py-3.5 border-b border-slate-800/60 last:border-0">
+        <div class="flex-1 min-w-0">
+          <p class="text-sm font-semibold text-white truncate">${s.company_name}</p>
+          ${s.contact_name ? `<p class="text-xs text-slate-500">${s.contact_name}</p>` : ''}
+        </div>
+        <div class="flex items-center gap-1.5 shrink-0">
+          ${badge(w9Set.has(s.id), 'W-9')}
+          ${badge(coiSet.has(s.id), 'COI')}
+          ${badge(agreementSet.has(s.id), 'Agreement')}
+        </div>
+      </div>`).join('');
+  } catch (err) {
+    console.warn('Sub compliance load error:', err);
+  }
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Subcontractors — SubPaperz</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="manifest" href="/manifest.json"/>
+<style>
+body{background:#0f172a;}
+input,select,textarea{background:#1e293b!important;color:#f1f5f9!important;border-color:#334155!important;}
+input:focus,select:focus{border-color:#3b82f6!important;outline:none;box-shadow:0 0 0 2px rgba(59,130,246,0.3);}
+.modal-bg{background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);}
+</style>
+</head>
+<body class="min-h-screen text-slate-100 font-sans flex">
+
+<!-- Sidebar -->
+<div class="w-56 bg-slate-900 border-r border-slate-700 flex flex-col min-h-screen fixed left-0 top-0 z-20">
+  <div class="px-4 py-5 border-b border-slate-700 flex items-center justify-between">
+    <a href="/app/index.html" class="text-blue-400 font-bold text-lg tracking-tight">SubPaperz</a>
+    <button id="langToggle" onclick="toggleLang()" class="text-xs bg-slate-700 hover:bg-slate-600 text-slate-300 px-2 py-1 rounded font-mono">EN</button>
+  </div>
+  <nav class="flex-1 px-2 py-4 space-y-1">
+    <a href="/app/dashboard.html" class="flex items-center gap-2 px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 text-sm" data-i18n="nav_dashboard">📊 Dashboard</a>
+    <a href="/app/projects.html" class="flex items-center gap-2 px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 text-sm" data-i18n="nav_projects">📁 Projects</a>
+    <a href="/app/subs.html" class="flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-900/40 text-blue-300 text-sm font-medium" data-i18n="nav_subs">👷 Subcontractors</a>
+    <a href="/app/documents.html" class="flex items-center gap-2 px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 text-sm" data-i18n="nav_docs">📄 Documents</a>
+    <a href="/app/coi-tracker.html" class="flex items-center gap-2 px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 text-sm" data-i18n="nav_coi">🛡 COI Tracker</a>
+    <a href="/app/account.html" class="flex items-center gap-2 px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 text-sm" data-i18n="nav_account">⚙️ Account</a>
+  </nav>
+  <div class="px-4 py-3 border-t border-slate-700">
+    <div id="planBadge" class="text-xs text-slate-500 mb-2">Free Plan</div>
+    <button onclick="signOut()" class="text-xs text-slate-500 hover:text-red-400" data-i18n="sign_out">Sign out</button>
+  </div>
+</div>
+
+<!-- Main -->
+<div class="ml-56 flex-1 p-8">
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-white" data-i18n="page_title">Subcontractors</h1>
+      <p class="text-slate-400 text-sm mt-1" data-i18n="page_sub">Manage your subcontractor roster and track compliance.</p>
+    </div>
+    <button onclick="openAddModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold" data-i18n="add_sub">+ Add Subcontractor</button>
+  </div>
+
+  <!-- Search -->
+  <div class="mb-4">
+    <input type="text" id="searchInput" placeholder="Search by name or company..." oninput="filterSubs()" class="w-full max-w-sm rounded-lg border px-3 py-2 text-sm"/>
+  </div>
+
+  <!-- Subs Table -->
+  <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="bg-slate-700 text-slate-400 text-xs uppercase tracking-wider">
+            <th class="px-4 py-3 text-left" data-i18n="col_company">Company</th>
+            <th class="px-4 py-3 text-left" data-i18n="col_contact">Contact</th>
+            <th class="px-4 py-3 text-left" data-i18n="col_trade">Trade</th>
+            <th class="px-4 py-3 text-left" data-i18n="col_email">Email</th>
+            <th class="px-4 py-3 text-center" data-i18n="col_score">Compliance</th>
+            <th class="px-4 py-3 text-center" data-i18n="col_actions">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="subsTableBody">
+          <tr id="emptyRow">
+            <td colspan="6" class="px-4 py-16 text-center">
+              <div class="text-4xl mb-3">👷</div>
+              <p class="text-slate-400 font-medium" data-i18n="empty_title">No subcontractors yet</p>
+              <p class="text-slate-500 text-sm mt-1" data-i18n="empty_sub">Add your first sub to start tracking their documents.</p>
+              <button onclick="openAddModal()" class="mt-4 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm" data-i18n="add_first">Add First Sub</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Add/Edit Sub Modal -->
+<div id="subModal" class="hidden fixed inset-0 modal-bg z-50 flex items-center justify-center p-4">
+  <div class="bg-slate-800 rounded-2xl border border-slate-700 w-full max-w-md">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-slate-700">
+      <h2 id="subModalTitle" class="font-semibold text-white">Add Subcontractor</h2>
+      <button onclick="closeSubModal()" class="text-slate-400 hover:text-white text-xl">✕</button>
+    </div>
+    <div class="p-6 space-y-4">
+      <input type="hidden" id="editSubId"/>
+      <div class="grid grid-cols-2 gap-3">
+        <div class="col-span-2">
+          <label class="block text-xs text-slate-400 mb-1">Company Name *</label>
+          <input type="text" id="sCompany" placeholder="Smith Electric LLC" class="w-full rounded-lg border px-3 py-2 text-sm"/>
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">Contact Name</label>
+          <input type="text" id="sContact" placeholder="John Smith" class="w-full rounded-lg border px-3 py-2 text-sm"/>
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">Trade</label>
+          <select id="sTrade" class="w-full rounded-lg border px-3 py-2 text-sm">
+            <option value="electrical">Electrical</option><option value="plumbing">Plumbing</option>
+            <option value="hvac">HVAC</option><option value="concrete">Concrete</option>
+            <option value="framing">Framing</option><option value="roofing">Roofing</option>
+            <option value="landscaping">Landscaping</option><option value="other">Other</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">Email</label>
+          <input type="email" id="sEmail" placeholder="john@smithelectric.com" class="w-full rounded-lg border px-3 py-2 text-sm"/>
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">Phone</label>
+          <input type="tel" id="sPhone" placeholder="(208) 555-0100" class="w-full rounded-lg border px-3 py-2 text-sm"/>
+        </div>
+      </div>
+      <div id="subModalError" class="hidden bg-red-900/40 border border-red-600 text-red-300 rounded-lg px-3 py-2 text-sm"></div>
+    </div>
+    <div class="px-6 py-4 border-t border-slate-700 flex gap-3 justify-end">
+      <button onclick="closeSubModal()" class="px-4 py-2 text-slate-400 hover:text-white text-sm">Cancel</button>
+      <button onclick="saveSub()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg text-sm font-semibold">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Portal Invite Modal -->
+<div id="inviteModal" class="hidden fixed inset-0 modal-bg z-50 flex items-center justify-center p-4">
+  <div class="bg-slate-800 rounded-2xl border border-slate-700 w-full max-w-md">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-slate-700">
+      <h2 class="font-semibold text-white">Send Portal Invite</h2>
+      <button onclick="document.getElementById('inviteModal').classList.add('hidden')" class="text-slate-400 hover:text-white text-xl">✕</button>
+    </div>
+    <div class="p-6 space-y-3">
+      <p class="text-slate-300 text-sm">An email will be sent with a 7-day link. The sub can upload their COI, W-9, and update their contact info — no login required.</p>
+      <div id="inviteSubInfo" class="bg-slate-700 rounded-lg p-3 text-sm text-slate-300"></div>
+      <div id="inviteResult" class="hidden rounded-lg p-3 text-sm"></div>
+    </div>
+    <div class="px-6 py-4 border-t border-slate-700 flex gap-3 justify-end">
+      <button onclick="document.getElementById('inviteModal').classList.add('hidden')" class="px-4 py-2 text-slate-400 hover:text-white text-sm">Cancel</button>
+      <button id="sendInviteBtn" class="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg text-sm font-semibold">Send Invite</button>
+    </div>
+  </div>
+</div>
+
+<!-- W-9 Request Modal -->
+<div id="w9Modal" class="hidden fixed inset-0 modal-bg z-50 flex items-center justify-center p-4">
+  <div class="bg-slate-800 rounded-2xl border border-slate-700 w-full max-w-md">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-slate-700">
+      <h2 class="font-semibold text-white">Send W-9 Request</h2>
+      <button onclick="document.getElementById('w9Modal').classList.add('hidden')" class="text-slate-400 hover:text-white text-xl">✕</button>
+    </div>
+    <div class="p-6 space-y-3">
+      <p class="text-slate-300 text-sm">An email will be sent to this subcontractor with a link to complete their W-9.</p>
+      <div id="w9SubInfo" class="bg-slate-700 rounded-lg p-3 text-sm text-slate-300"></div>
+      <div id="w9Result" class="hidden rounded-lg p-3 text-sm"></div>
+    </div>
+    <div class="px-6 py-4 border-t border-slate-700 flex gap-3 justify-end">
+      <button onclick="document.getElementById('w9Modal').classList.add('hidden')" class="px-4 py-2 text-slate-400 hover:text-white text-sm">Cancel</button>
+      <button id="sendW9Btn" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg text-sm font-semibold">Send Request</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/js/config.js"></script>
+<script src="/js/supabase-client.js"></script>
+<script src="/js/auth.js"></script>
+<script src="/js/email.js"></script>
+<script src="/js/subs.js"></script>
+<script>
+// i18n
+const I18N = {
+  en: { nav_dashboard:'📊 Dashboard', nav_projects:'📁 Projects', nav_subs:'👷 Subcontractors', nav_docs:'📄 Documents', nav_coi:'🛡 COI Tracker', nav_account:'⚙️ Account', sign_out:'Sign out', page_title:'Subcontractors', page_sub:'Manage your subcontractor roster and track compliance.', add_sub:'+ Add Subcontractor', col_company:'Company', col_contact:'Contact', col_trade:'Trade', col_email:'Email', col_score:'Compliance', col_actions:'Actions', empty_title:'No subcontractors yet', empty_sub:'Add your first sub to start tracking their documents.', add_first:'Add First Sub' },
+  es: { nav_dashboard:'📊 Panel', nav_projects:'📁 Proyectos', nav_subs:'👷 Subcontratistas', nav_docs:'📄 Documentos', nav_coi:'🛡 Seguro (COI)', nav_account:'⚙️ Cuenta', sign_out:'Cerrar sesión', page_title:'Subcontratistas', page_sub:'Administra tu lista de subcontratistas y rastrea documentos.', add_sub:'+ Agregar Subcontratista', col_company:'Empresa', col_contact:'Contacto', col_trade:'Oficio', col_email:'Correo', col_score:'Cumplimiento', col_actions:'Acciones', empty_title:'Sin subcontratistas', empty_sub:'Agrega tu primer subcontratista para comenzar.', add_first:'Agregar Primero' }
+};
+let lang = localStorage.getItem('sp_lang') || 'en';
+function applyLang() {
+  const t = I18N[lang];
+  document.querySelectorAll('[data-i18n]').forEach(el => { if(t[el.dataset.i18n]) el.textContent = t[el.dataset.i18n]; });
+  document.getElementById('langToggle').textContent = lang.toUpperCase();
+}
+function toggleLang() { lang = lang==='en'?'es':'en'; localStorage.setItem('sp_lang',lang); applyLang(); }
+
+let allSubs = [];
+const SCORE_COLORS = { 100:'bg-green-900/40 text-green-400 border-green-700', 75:'bg-green-900/40 text-green-400 border-green-700', 50:'bg-yellow-900/40 text-yellow-400 border-yellow-700', 25:'bg-red-900/40 text-red-400 border-red-700', 0:'bg-red-900/40 text-red-400 border-red-700' };
+const TRADES = { electrical:'⚡ Electrical', plumbing:'🔧 Plumbing', hvac:'❄️ HVAC', concrete:'🏗 Concrete', framing:'🪚 Framing', roofing:'🏠 Roofing', landscaping:'🌿 Landscaping', other:'🔨 Other' };
+
+async function init() {
+  await checkAuth();
+  applyLang();
+  await refresh();
+}
+
+async function refresh() {
+  try { allSubs = await loadSubs(); renderTable(allSubs); } catch(e) { console.error(e); }
+}
+
+function filterSubs() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  renderTable(allSubs.filter(s => (s.company_name||'').toLowerCase().includes(q) || (s.contact_name||'').toLowerCase().includes(q)));
+}
+
+function renderTable(subs) {
+  const tbody = document.getElementById('subsTableBody');
+  if (!subs.length) { tbody.innerHTML = document.getElementById('emptyRow').outerHTML; return; }
+  tbody.innerHTML = subs.map(s => {
+    const score = s._score ?? 0;
+    const scoreKey = score >= 100 ? 100 : score >= 75 ? 75 : score >= 50 ? 50 : score >= 25 ? 25 : 0;
+    const scoreColor = SCORE_COLORS[scoreKey];
+    return `<tr class="border-t border-slate-700 hover:bg-slate-700/30 transition">
+      <td class="px-4 py-3 font-medium text-white">${esc(s.company_name)}</td>
+      <td class="px-4 py-3 text-slate-300">${esc(s.contact_name||'—')}</td>
+      <td class="px-4 py-3 text-slate-400 text-xs">${TRADES[s.trade]||s.trade||'—'}</td>
+      <td class="px-4 py-3 text-slate-400 text-xs">${esc(s.email||'—')}</td>
+      <td class="px-4 py-3 text-center">
+        <span class="inline-flex px-2 py-0.5 rounded-full border text-xs font-medium ${scoreColor}">${score}%</span>
+      </td>
+      <td class="px-4 py-3">
+        <div class="flex items-center justify-center gap-2">
+          <a href="/app/documents.html?sub=${s.id}" class="text-blue-400 hover:text-blue-300 text-xs">Docs</a>
+          <button onclick="openW9Modal('${s.id}')" class="text-slate-400 hover:text-white text-xs">W-9</button>
+          <button onclick="openInviteModal('${s.id}')" class="text-green-400 hover:text-green-300 text-xs">Invite</button>
+          <button onclick="editSub('${s.id}')" class="text-slate-400 hover:text-white text-xs">Edit</button>
+          <button onclick="confirmDeleteSub('${s.id}')" class="text-red-400 hover:text-red-300 text-xs">Delete</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function openAddModal() { document.getElementById('editSubId').value=''; document.getElementById('subModalTitle').textContent='Add Subcontractor'; ['sCompany','sContact','sEmail','sPhone'].forEach(id=>document.getElementById(id).value=''); document.getElementById('sTrade').value='electrical'; document.getElementById('subModalError').classList.add('hidden'); document.getElementById('subModal').classList.remove('hidden'); }
+function closeSubModal() { document.getElementById('subModal').classList.add('hidden'); }
+
+function editSub(id) {
+  const s = allSubs.find(x=>x.id===id); if(!s) return;
+  document.getElementById('editSubId').value=id;
+  document.getElementById('subModalTitle').textContent='Edit Subcontractor';
+  document.getElementById('sCompany').value=s.company_name||'';
+  document.getElementById('sContact').value=s.contact_name||'';
+  document.getElementById('sEmail').value=s.email||'';
+  document.getElementById('sPhone').value=s.phone||'';
+  document.getElementById('sTrade').value=s.trade||'other';
+  document.getElementById('subModalError').classList.add('hidden');
+  document.getElementById('subModal').classList.remove('hidden');
+}
+
+async function saveSub() {
+  const id = document.getElementById('editSubId').value;
+  const company = document.getElementById('sCompany').value.trim();
+  const errEl = document.getElementById('subModalError');
+  if(!company){ errEl.textContent='Company name is required.'; errEl.classList.remove('hidden'); return; }
+  const data = { company_name:company, contact_name:document.getElementById('sContact').value, email:document.getElementById('sEmail').value, phone:document.getElementById('sPhone').value, trade:document.getElementById('sTrade').value };
+  try { errEl.classList.add('hidden'); if(id) await updateSub(id,data); else await createSub(data); closeSubModal(); await refresh(); } catch(e){ errEl.textContent=e.message; errEl.classList.remove('hidden'); }
+}
+
+async function confirmDeleteSub(id) {
+  if(!confirm('Delete this subcontractor? This will also remove their documents.')) return;
+  try { await deleteSub(id); await refresh(); } catch(e){ alert(e.message); }
+}
+
+function openW9Modal(subId) {
+  const s = allSubs.find(x=>x.id===subId); if(!s) return;
+  document.getElementById('w9SubInfo').textContent = `${s.company_name} — ${s.email||'No email on file'}`;
+  document.getElementById('w9Result').classList.add('hidden');
+  document.getElementById('w9Modal').classList.remove('hidden');
+  document.getElementById('sendW9Btn').onclick = async () => {
+    if(!s.email){ alert('This sub has no email on file. Edit their profile first.'); return; }
+    const url = `${window.location.origin}/forms/w9.html`;
+    const res = await sendW9Request({ subEmail:s.email, subName:s.contact_name||s.company_name, gcName:'Your Company', w9URL:url });
+    const el = document.getElementById('w9Result');
+    el.classList.remove('hidden');
+    if(res.success){ el.className='rounded-lg p-3 text-sm bg-green-900/40 border border-green-600 text-green-300'; el.textContent='✓ W-9 request sent successfully.'; }
+    else { el.className='rounded-lg p-3 text-sm bg-red-900/40 border border-red-600 text-red-300'; el.textContent='Error: '+res.error; }
+  };
+}
+
+function openInviteModal(subId) {
+  const s = allSubs.find(x=>x.id===subId); if(!s) return;
+  document.getElementById('inviteSubInfo').textContent = `${s.company_name} — ${s.email||'No email on file'}`;
+  document.getElementById('inviteResult').classList.add('hidden');
+  document.getElementById('inviteModal').classList.remove('hidden');
+  document.getElementById('sendInviteBtn').onclick = async () => {
+    if(!s.email){ alert('This sub has no email on file. Edit their profile first.'); return; }
+    const btn = document.getElementById('sendInviteBtn');
+    btn.textContent = 'Sending...'; btn.disabled = true;
+    try {
+      const { data: { user } } = await db.auth.getUser();
+      const { data: profile } = await db.from('profiles').select('company_name').eq('id', user.id).single();
+      const gcName = profile?.company_name || 'Your General Contractor';
+      const { portalURL } = await generatePortalInvite(s.id);
+      const res = await sendSubPortalInvite({ subEmail: s.email, subName: s.contact_name||s.company_name, gcName, portalURL });
+      const el = document.getElementById('inviteResult');
+      el.classList.remove('hidden');
+      if(res.success){ el.className='rounded-lg p-3 text-sm bg-green-900/40 border border-green-600 text-green-300'; el.textContent='✓ Portal invite sent successfully.'; }
+      else { el.className='rounded-lg p-3 text-sm bg-red-900/40 border border-red-600 text-red-300'; el.textContent='Error: '+res.error; }
+    } catch(e) {
+      const el = document.getElementById('inviteResult');
+      el.classList.remove('hidden');
+      el.className='rounded-lg p-3 text-sm bg-red-900/40 border border-red-600 text-red-300';
+      el.textContent='Error: '+e.message;
+    }
+    btn.textContent = 'Send Invite'; btn.disabled = false;
+  };
+}
+
+function signOut(){ db.auth.signOut().then(()=>window.location.href='/index.html'); }
+init();
+</script>
+</body>
+</html>
